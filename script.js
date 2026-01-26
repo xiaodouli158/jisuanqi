@@ -673,3 +673,80 @@ function formatNumber(n) {
 function formatNumbers(numbers) {
     return numbers.map(n => formatNumber(n)).join(', ');
 }
+
+
+// 插入号码
+function insertNumbers() {
+    const input = document.getElementById('numberInput').value.trim();
+    
+    if (!input) {
+        alert('请输入号码');
+        return;
+    }
+    
+    // 解析输入的号码
+    const numbers = parseNumberInput(input);
+    
+    if (numbers.length === 0) {
+        alert('输入格式错误，请检查');
+        return;
+    }
+    
+    // 格式化为两位数
+    const formattedNumbers = numbers.map(n => n.toString().padStart(2, '0'));
+    
+    // 添加到结果框
+    const resultText = document.getElementById('resultText');
+    const currentValue = resultText.value.trim();
+    
+    if (currentValue) {
+        resultText.value = currentValue + ', ' + formattedNumbers.join(', ');
+    } else {
+        resultText.value = formattedNumbers.join(', ');
+    }
+    
+    // 清空输入框
+    document.getElementById('numberInput').value = '';
+}
+
+// 解析用户输入的号码
+function parseNumberInput(input) {
+    const numbers = new Set();
+    
+    // 处理范围表达式（使用~）
+    // 先分割所有的~表达式
+    const parts = input.split(/[,.\-\s]+/);
+    
+    for (let part of parts) {
+        part = part.trim();
+        
+        if (!part) continue;
+        
+        // 检查是否包含范围符号~
+        if (part.includes('~')) {
+            const [start, end] = part.split('~').map(s => parseInt(s.trim()));
+            
+            if (isNaN(start) || isNaN(end)) {
+                continue;
+            }
+            
+            const min = Math.min(start, end);
+            const max = Math.max(start, end);
+            
+            for (let i = min; i <= max; i++) {
+                if (i >= 1 && i <= 49) {
+                    numbers.add(i);
+                }
+            }
+        } else {
+            // 单个号码
+            const num = parseInt(part);
+            
+            if (!isNaN(num) && num >= 1 && num <= 49) {
+                numbers.add(num);
+            }
+        }
+    }
+    
+    return Array.from(numbers).sort((a, b) => a - b);
+}

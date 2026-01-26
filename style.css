@@ -64,9 +64,14 @@ body {
 }
 
 .btn-active {
-    background: #d4a574;
-    color: white;
-    border-color: #b8935f;
+    background: #d4a574 !important;
+    color: white !important;
+    border-color: #b8935f !important;
+}
+
+.btn-active:hover {
+    background: #c49464 !important;
+    transform: translateY(-1px);
 }
 
 .btn-red {
@@ -105,7 +110,8 @@ body {
 }
 
 .input-section input {
-    width: 80px;
+    flex: 1;
+    min-width: 200px;
     padding: 8px;
     border: 1px solid #999;
     border-radius: 4px;
@@ -115,6 +121,7 @@ body {
 .input-section .hint {
     color: #666;
     font-size: 12px;
+    flex-basis: 100%;
 }
 
 .btn-insert {
