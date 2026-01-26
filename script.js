@@ -437,8 +437,8 @@ function clearResult() {
     // 清空自定义号码
     customNumbers.clear();
 
-    // 清空杀码
-    killNumbers.clear();
+    // 清空所有杀码（包括killNumbers和killConditions）
+    clearAllKill();
 
     // 移除所有按钮的激活状态
     const buttons = document.querySelectorAll('.btn.btn-active');
@@ -463,9 +463,6 @@ function clearResult() {
     // 清空输入框
     document.getElementById('numberInput').value = '';
     document.getElementById('killInput').value = '';
-
-    // 更新杀码显示
-    updateKillDisplay();
 }
 
 // 复制结果
