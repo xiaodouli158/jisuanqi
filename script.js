@@ -97,6 +97,14 @@ const killOptionsData = {
     general: ['大', '小', '单', '双', '野兽', '家畜', '尾大', '尾小']
 };
 
+// 通用分类到具体分类的映射
+const GENERAL_CATEGORY_MAP = {
+    '大': 'size', '小': 'size',
+    '单': 'parity', '双': 'parity',
+    '野兽': 'beast', '家畜': 'beast',
+    '尾大': 'tail-size', '尾小': 'tail-size'
+};
+
 // 当前计算模式
 let currentMode = 'single';
 
@@ -113,6 +121,9 @@ let dragCodes = new Set(); // 拖码号码
 
 // 当前等待处理的按钮信息
 let pendingButton = null;
+
+// DOM缓存
+let cachedNumberSection = null;
 
 // 初始化按钮点击事件
 document.addEventListener('DOMContentLoaded', function () {
@@ -225,16 +236,10 @@ function hasMultipleCategories() {
 
 // 模式切换
 function onModeChange() {
-    const oldMode = currentMode;
+    // 切换模式前先清空所有数据
+    clearResult();
+    // 更新当前模式
     currentMode = document.getElementById('calcMode').value;
-
-    // 如果从拖式切换到其他模式，或从其他模式切换到拖式，清空拖胆拖码
-    if (oldMode.startsWith('drag') !== currentMode.startsWith('drag')) {
-        dragBalls.clear();
-        dragCodes.clear();
-    }
-
-    calculateAll();
 }
 
 // 生成组合（从数组中选择n个元素的所有组合）
@@ -261,23 +266,15 @@ function getCombinations(arr, n) {
     return result;
 }
 
-// 检查组合是否有重复号码
+// 检查组合是否有重复号码（用于拖式模式）
+// 优化：利用Set的大小判断是否有重复元素
 function hasNoDuplicates(combo) {
-    const set = new Set(combo);
-    return set.size === combo.length;
+    return new Set(combo).size === combo.length;
 }
 
-// 组合排序（用于去重）
-function sortCombo(combo) {
-    return [...combo].sort((a, b) => a - b);
-}
-
-// 组合转字符串（用于去重）
-function comboToString(combo) {
-    return sortCombo(combo).join(',');
-}
-
-// 生成复式组合
+// 生成复式组合（优化版）
+// 说明：getCombinations函数使用递增索引生成组合，天然保证无重复元素
+// 因此无需额外的hasNoDuplicates检查和comboToString去重
 function generateCompoundCombinations(numbers, n) {
     if (numbers.length < n) return [];
 
@@ -286,59 +283,13 @@ function generateCompoundCombinations(numbers, n) {
 
     if (filtered.length < n) return [];
 
-    const combinations = getCombinations(filtered, n);
-    const uniqueCombos = new Set();
-    const result = [];
-
-    combinations.forEach(combo => {
-        if (hasNoDuplicates(combo)) {
-            const key = comboToString(combo);
-            if (!uniqueCombos.has(key)) {
-                uniqueCombos.add(key);
-                result.push(sortCombo(combo));
-            }
-        }
-    });
-
-    return result;
+    // getCombinations生成的组合本身就无重复，直接排序返回
+    return getCombinations(filtered, n).map(combo =>
+        combo.sort((a, b) => a - b)
+    );
 }
 
-// 生成拖式组合（第一个分类作为拖胆，其他作为拖码）
-function generateDragCombinations(categories, n) {
-    if (categories.length < 2) return [];
 
-    const dragBall = categories[0]; // 拖胆
-    const dragCode = []; // 拖码
-
-    for (let i = 1; i < categories.length; i++) {
-        dragCode.push(...categories[i]);
-    }
-
-    // 去重拖码
-    const uniqueDragCode = [...new Set(dragCode)];
-
-    const result = [];
-    const uniqueCombos = new Set();
-
-    // 拖胆中的每个号码
-    dragBall.forEach(ball => {
-        // 从拖码中选择 n-1 个号码
-        const codeCombos = getCombinations(uniqueDragCode, n - 1);
-
-        codeCombos.forEach(codeCombo => {
-            const combo = [ball, ...codeCombo];
-            if (hasNoDuplicates(combo)) {
-                const key = comboToString(combo);
-                if (!uniqueCombos.has(key)) {
-                    uniqueCombos.add(key);
-                    result.push(sortCombo(combo));
-                }
-            }
-        });
-    });
-
-    return result;
-}
 
 // 获取分类的号码
 function getNumbersByCategory(category, value) {
@@ -540,10 +491,14 @@ function calculateAll() {
         // 单式：计算交集和并集
         const finalNumbers = calculateFinalNumbers(); // 交集
 
-        // 计算并集
+        // 计算并集（排除杀码）
         const allNumbersSet = new Set();
         categoryNumbers.forEach(catNums => {
-            catNums.forEach(num => allNumbersSet.add(num));
+            catNums.forEach(num => {
+                if (!killNumbers.has(num)) {
+                    allNumbersSet.add(num);
+                }
+            });
         });
         const unionNumbers = Array.from(allNumbersSet).sort((a, b) => a - b);
 
@@ -646,9 +601,9 @@ function calculateAll() {
             return;
         }
 
-        // 生成拖式组合
+        // 生成拖式组合（优化版：使用Set自动去重）
         const combinations = [];
-        const uniqueCombos = new Set();
+        const uniqueKeys = new Set();
 
         // 对每个拖胆号码
         dragBallArray.forEach(ball => {
@@ -659,10 +614,11 @@ function calculateAll() {
                 const combo = [ball, ...codeCombo];
                 // 检查是否有重复号码
                 if (hasNoDuplicates(combo)) {
-                    const key = comboToString(combo);
-                    if (!uniqueCombos.has(key)) {
-                        uniqueCombos.add(key);
-                        combinations.push(sortCombo(combo));
+                    const sorted = combo.sort((a, b) => a - b);
+                    const key = sorted.join(',');
+                    if (!uniqueKeys.has(key)) {
+                        uniqueKeys.add(key);
+                        combinations.push(sorted);
                     }
                 }
             });
@@ -748,8 +704,31 @@ function insertCustomNumbers() {
     // 创建或更新自定义按钮
     let customBtn = document.getElementById('customNumberBtn');
     if (!customBtn) {
-        // 创建自定义按钮
-        const buttonRow = document.querySelector('.category-section:last-of-type .button-row');
+        // 创建自定义按钮 - 找到"号码"分类的按钮行
+
+        // 优化：使用缓存的Section，避免重复查询DOM
+        if (!cachedNumberSection) {
+            const categorySections = document.querySelectorAll('.category-section');
+            for (let section of categorySections) {
+                const title = section.querySelector('.category-title');
+                if (title && title.textContent.trim() === '号码') {
+                    cachedNumberSection = section;
+                    break;
+                }
+            }
+        }
+
+        if (!cachedNumberSection) {
+            console.error('找不到号码分类');
+            return;
+        }
+
+        const buttonRow = cachedNumberSection.querySelector('.button-row');
+        if (!buttonRow) {
+            console.error('找不到按钮行');
+            return;
+        }
+
         customBtn = document.createElement('button');
         customBtn.id = 'customNumberBtn';
         customBtn.className = 'btn btn-active';
@@ -764,6 +743,15 @@ function insertCustomNumbers() {
                 this.classList.remove('btn-active');
                 selectedButtons.number.delete('自定义');
                 customNumbers.clear();
+
+                // 如果是拖式模式，从拖胆和拖码中移除
+                if (currentMode.startsWith('drag')) {
+                    const currentNumbers = Array.from(customNumbers);
+                    currentNumbers.forEach(n => {
+                        dragBalls.delete(n);
+                        dragCodes.delete(n);
+                    });
+                }
             } else {
                 this.classList.add('btn-active');
                 selectedButtons.number.add('自定义');
@@ -771,14 +759,26 @@ function insertCustomNumbers() {
             calculateAll();
         });
     } else {
+        // 按钮已存在，确保它是激活状态
         customBtn.classList.add('btn-active');
     }
 
     // 清空输入框
     document.getElementById('numberInput').value = '';
 
-    // 自动计算结果
-    calculateAll();
+    // 如果是拖式模式，显示选择对话框
+    if (currentMode.startsWith('drag')) {
+        pendingButton = {
+            element: customBtn,
+            type: 'number',
+            text: '自定义',
+            numbers: numbers
+        };
+        showDragDialog();
+    } else {
+        // 非拖式模式，直接计算结果
+        calculateAll();
+    }
 }
 
 // 解析用户输入的号码
@@ -862,11 +862,7 @@ function updateTotalKillNumbers() {
     calculateAll();
 }
 
-// 兼容旧函数名（如果有调用）
-// 兼容旧函数名（如果有调用）
-function clearKillNumbers() {
-    clearAllKill();
-}
+
 
 // 初始化杀码下拉框
 function initKillSelect() {
@@ -932,14 +928,10 @@ function addUnifiedKill() {
     if (selectValue) {
         const [category, value] = selectValue.split(':');
 
-        // 映射通用分类到具体分类
-        let realCategory = category;
-        if (category === 'general') {
-            if (['大', '小'].includes(value)) realCategory = 'size';
-            else if (['单', '双'].includes(value)) realCategory = 'parity';
-            else if (['野兽', '家畜'].includes(value)) realCategory = 'beast';
-            else if (['尾大', '尾小'].includes(value)) realCategory = 'tail-size';
-        }
+        // 使用映射表转换通用分类到具体分类
+        const realCategory = category === 'general'
+            ? (GENERAL_CATEGORY_MAP[value] || category)
+            : category;
 
         const nums = getNumbersByCategory(realCategory, value);
 
