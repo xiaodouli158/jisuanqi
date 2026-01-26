@@ -751,23 +751,17 @@ function insertCustomNumbers() {
 function parseNumberInput(input) {
     const numbers = new Set();
     
-    // 处理范围表达式（使用~）
-    // 先分割所有的~表达式
-    const parts = input.split(/[,.\-\s]+/);
+    // 先处理范围表达式（使用~或-）
+    // 将~和-都作为范围符号处理
+    const rangePattern = /(\d+)\s*[-~]\s*(\d+)/g;
+    let match;
     
-    for (let part of parts) {
-        part = part.trim();
+    // 先处理所有范围表达式
+    while ((match = rangePattern.exec(input)) !== null) {
+        const start = parseInt(match[1]);
+        const end = parseInt(match[2]);
         
-        if (!part) continue;
-        
-        // 检查是否包含范围符号~
-        if (part.includes('~')) {
-            const [start, end] = part.split('~').map(s => parseInt(s.trim()));
-            
-            if (isNaN(start) || isNaN(end)) {
-                continue;
-            }
-            
+        if (!isNaN(start) && !isNaN(end)) {
             const min = Math.min(start, end);
             const max = Math.max(start, end);
             
@@ -776,13 +770,25 @@ function parseNumberInput(input) {
                     numbers.add(i);
                 }
             }
-        } else {
-            // 单个号码
-            const num = parseInt(part);
-            
-            if (!isNaN(num) && num >= 1 && num <= 49) {
-                numbers.add(num);
-            }
+        }
+    }
+    
+    // 移除已处理的范围表达式，只保留单个号码
+    let remaining = input.replace(/(\d+)\s*[-~]\s*(\d+)/g, '');
+    
+    // 分割剩余的号码（使用逗号、点、空格作为分隔符）
+    const parts = remaining.split(/[,.\s]+/);
+    
+    for (let part of parts) {
+        part = part.trim();
+        
+        if (!part) continue;
+        
+        // 单个号码
+        const num = parseInt(part);
+        
+        if (!isNaN(num) && num >= 1 && num <= 49) {
+            numbers.add(num);
         }
     }
     
