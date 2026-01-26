@@ -78,6 +78,9 @@ let selectedButtons = {
     'tail-size': new Set()  // 尾大/尾小
 };
 
+// 自定义输入的号码
+let customNumbers = new Set();
+
 // 当前计算模式
 let currentMode = 'single';
 
@@ -328,6 +331,10 @@ function generateDragCombinations(categories, n) {
 function getNumbersByCategory(category, value) {
     switch(category) {
         case 'number':
+            // 如果是自定义输入，返回自定义号码
+            if (value === '自定义') {
+                return Array.from(customNumbers).sort((a, b) => a - b);
+            }
             return [parseInt(value)];
         case 'zodiac':
             return numberData.zodiac[value] || [];
@@ -408,6 +415,9 @@ function clearResult() {
         selectedButtons[category].clear();
     }
     
+    // 清空自定义号码
+    customNumbers.clear();
+    
     // 移除所有按钮的激活状态
     const buttons = document.querySelectorAll('.btn.btn-active');
     buttons.forEach(btn => {
@@ -427,6 +437,9 @@ function clearResult() {
     // 清空拖胆拖码
     dragBalls.clear();
     dragCodes.clear();
+    
+    // 清空输入框
+    document.getElementById('numberInput').value = '';
 }
 
 // 复制结果
@@ -675,8 +688,8 @@ function formatNumbers(numbers) {
 }
 
 
-// 插入号码
-function insertNumbers() {
+// 插入自定义号码
+function insertCustomNumbers() {
     const input = document.getElementById('numberInput').value.trim();
     
     if (!input) {
@@ -692,21 +705,46 @@ function insertNumbers() {
         return;
     }
     
-    // 格式化为两位数
-    const formattedNumbers = numbers.map(n => n.toString().padStart(2, '0'));
+    // 保存自定义号码
+    customNumbers = new Set(numbers);
     
-    // 添加到结果框
-    const resultText = document.getElementById('resultText');
-    const currentValue = resultText.value.trim();
+    // 添加到selectedButtons中
+    selectedButtons.number.add('自定义');
     
-    if (currentValue) {
-        resultText.value = currentValue + ', ' + formattedNumbers.join(', ');
+    // 创建或更新自定义按钮
+    let customBtn = document.getElementById('customNumberBtn');
+    if (!customBtn) {
+        // 创建自定义按钮
+        const buttonRow = document.querySelector('.category-section:last-of-type .button-row');
+        customBtn = document.createElement('button');
+        customBtn.id = 'customNumberBtn';
+        customBtn.className = 'btn btn-active';
+        customBtn.setAttribute('data-type', 'number');
+        customBtn.textContent = '自定义';
+        customBtn.style.marginRight = '10px';
+        buttonRow.appendChild(customBtn);
+        
+        // 添加点击事件
+        customBtn.addEventListener('click', function() {
+            if (this.classList.contains('btn-active')) {
+                this.classList.remove('btn-active');
+                selectedButtons.number.delete('自定义');
+                customNumbers.clear();
+            } else {
+                this.classList.add('btn-active');
+                selectedButtons.number.add('自定义');
+            }
+            calculateAll();
+        });
     } else {
-        resultText.value = formattedNumbers.join(', ');
+        customBtn.classList.add('btn-active');
     }
     
     // 清空输入框
     document.getElementById('numberInput').value = '';
+    
+    // 自动计算结果
+    calculateAll();
 }
 
 // 解析用户输入的号码
