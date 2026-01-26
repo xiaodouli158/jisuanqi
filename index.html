@@ -1,19 +1,21 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>号码统计计算器</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <div class="container">
         <h2 style="text-align: center; margin-bottom: 20px;">号码统计计算器</h2>
-        
-        <!-- 操作栏：计算模式和按钮 -->
+
+        <!-- 操作栏:计算模式和按钮 -->
         <div class="action-buttons">
             <div style="display: flex; align-items: center; gap: 10px;">
-                <label style="font-weight: bold;">计算模式：</label>
+                <label style="font-weight: bold;">计算模式:</label>
                 <select id="calcMode" onchange="onModeChange()">
                     <option value="single">单式</option>
                     <option value="compound2">复式二</option>
@@ -35,18 +37,18 @@
                 <button class="action-btn" onclick="copyResult()">复制</button>
             </div>
         </div>
-        
+
         <!-- 拖式选择对话框 -->
         <div id="dragDialog" class="drag-dialog" style="display: none;">
             <div class="drag-dialog-content">
-                <p style="margin-bottom: 15px; font-size: 16px; font-weight: bold;">请选择号码类型：</p>
+                <p style="margin-bottom: 15px; font-size: 16px; font-weight: bold;">请选择号码类型:</p>
                 <div style="display: flex; gap: 10px; justify-content: center;">
                     <button class="drag-btn drag-btn-ball" onclick="selectDragType('ball')">拖胆</button>
                     <button class="drag-btn drag-btn-code" onclick="selectDragType('code')">拖码</button>
                 </div>
             </div>
         </div>
-        
+
         <!-- 结果显示区域 -->
         <div class="statistics">
             <div id="statsOutput">请选择分类条件...</div>
@@ -192,15 +194,47 @@
                 <button class="btn" data-type="number">49</button>
             </div>
             <div class="input-section" style="margin-top: 10px; border: none; background: none; padding: 0;">
-                <input type="text" id="numberInput" placeholder="自定义输入：01,02,03 或 01~10 或 01.02-03" style="flex: 1; min-width: 200px;" />
+                <input type="text" id="numberInput" placeholder="自定义输入:01,02,03 或 01~10 或 01.02-03"
+                    style="flex: 1; min-width: 200px;" />
                 <button class="btn-insert" onclick="insertCustomNumbers()">添加</button>
-                <span class="hint">(支持 , . 空格 作为分隔符，~ 或 - 表示范围)</span>
+                <span class="hint">(支持 , . 空格 作为分隔符,~ 或 - 表示范围)</span>
             </div>
         </div>
 
+        <!-- 杀码分类 -->
+        <div class="category-section">
+            <h3 class="category-title">杀码</h3>
+
+            <!-- 统一添加区域 -->
+            <div class="input-section" style="margin-top: 10px; border: none; background: none; padding: 0;">
+                <label>添加条件:</label>
+                <select id="killSelect"
+                    style="padding: 8px; border-radius: 4px; border: 1px solid #999; margin-right: 10px; min-width: 120px;">
+                    <option value="">-- 快捷选项 --</option>
+                </select>
+
+                <span style="margin-right: 10px; color: #666;">或</span>
+
+                <input type="text" id="killInput" placeholder="例如: 01,05,10 或 01-10 或 1~5"
+                    style="flex: 1; min-width: 150px;" />
+                <button class="btn-insert" onclick="addUnifiedKill()">添加</button>
+            </div>
+
+            <!-- 已添加的杀码条件列表 -->
+            <div id="killList" class="kill-list-container"
+                style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 10px;">
+                <!-- 动态生成的标签将显示在这里 -->
+            </div>
+
+            <div style="margin-top: 10px; text-align: right;">
+                <button class="btn-insert" onclick="clearAllKill()"
+                    style="background-color: #6c757d; padding: 5px 15px; font-size: 12px;">清空所有杀码</button>
+            </div>
+        </div>
 
     </div>
 
     <script src="script.js"></script>
 </body>
+
 </html>

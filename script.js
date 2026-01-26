@@ -1,8 +1,8 @@
 // 号码数据定义
 const numberData = {
     // 1-49号码的各种属性
-    numbers: Array.from({length: 49}, (_, i) => i + 1),
-    
+    numbers: Array.from({ length: 49 }, (_, i) => i + 1),
+
     // 生肖 (准确对应)
     zodiac: {
         '蛇': [1, 13, 25, 37, 49],
@@ -18,7 +18,7 @@ const numberData = {
         '羊': [11, 23, 35, 47],
         '马': [12, 24, 36, 48]
     },
-    
+
     // 野兽和家畜
     beast: {
         // 野兽：鼠、虎、兔、龙、蛇、猴
@@ -26,7 +26,7 @@ const numberData = {
         // 家畜：牛、马、羊、鸡、狗、猪
         '家畜': [5, 7, 8, 9, 11, 12, 17, 19, 20, 21, 23, 24, 29, 31, 32, 33, 35, 36, 41, 43, 44, 45, 47, 48]
     },
-    
+
     // 五行
     element: {
         '金': [3, 4, 11, 12, 25, 26, 33, 34, 41, 42],
@@ -35,13 +35,13 @@ const numberData = {
         '火': [1, 2, 9, 10, 17, 18, 31, 32, 39, 40, 47, 48],
         '土': [5, 6, 19, 20, 27, 28, 35, 36, 49]
     },
-    
+
     // 大小: 大(25-49), 小(1-24)
     size: {
-        big: Array.from({length: 25}, (_, i) => i + 25),
-        small: Array.from({length: 24}, (_, i) => i + 1)
+        big: Array.from({ length: 25 }, (_, i) => i + 25),
+        small: Array.from({ length: 24 }, (_, i) => i + 1)
     },
-    
+
     // 尾大尾小
     tailSize: {
         // 尾大：尾数为5-9
@@ -49,13 +49,13 @@ const numberData = {
         // 尾小：尾数为0-4
         small: [1, 2, 3, 4, 10, 11, 12, 13, 14, 20, 21, 22, 23, 24, 30, 31, 32, 33, 34, 40, 41, 42, 43, 44]
     },
-    
+
     // 单双
     parity: {
-        odd: Array.from({length: 25}, (_, i) => i * 2 + 1).filter(n => n <= 49),
-        even: Array.from({length: 24}, (_, i) => (i + 1) * 2).filter(n => n <= 49)
+        odd: Array.from({ length: 25 }, (_, i) => i * 2 + 1).filter(n => n <= 49),
+        even: Array.from({ length: 24 }, (_, i) => (i + 1) * 2).filter(n => n <= 49)
     },
-    
+
     // 波色
     wave: {
         red: [1, 2, 7, 8, 12, 13, 18, 19, 23, 24, 29, 30, 34, 35, 40, 45, 46],
@@ -81,6 +81,22 @@ let selectedButtons = {
 // 自定义输入的号码
 let customNumbers = new Set();
 
+// 杀码号码
+let killNumbers = new Set();
+// 杀码条件列表
+let killConditions = [];
+let nextKillId = 1;
+
+// 杀码选项数据
+const killOptionsData = {
+    zodiac: ['蛇', '龙', '兔', '虎', '鼠', '猴', '猪', '狗', '鸡', '羊', '马', '牛'],
+    element: ['金', '木', '水', '火', '土'],
+    wave: ['红波', '蓝波', '绿波'],
+    head: ['0头', '1头', '2头', '3头', '4头'],
+    tail: ['0尾', '1尾', '2尾', '3尾', '4尾', '5尾', '6尾', '7尾', '8尾', '9尾'],
+    general: ['大', '小', '单', '双', '野兽', '家畜', '尾大', '尾小']
+};
+
 // 当前计算模式
 let currentMode = 'single';
 
@@ -99,23 +115,23 @@ let dragCodes = new Set(); // 拖码号码
 let pendingButton = null;
 
 // 初始化按钮点击事件
-document.addEventListener('DOMContentLoaded', function() {
-    const buttons = document.querySelectorAll('.btn');
+document.addEventListener('DOMContentLoaded', function () {
+    const buttons = document.querySelectorAll('.btn:not(.kill-btn)');
     buttons.forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
             const type = this.getAttribute('data-type');
             const text = this.textContent;
-            
+
             if (!this.classList.contains('btn-active')) {
                 // 尝试添加选择
                 this.classList.add('btn-active');
                 if (selectedButtons[type]) {
                     selectedButtons[type].add(text);
                 }
-                
+
                 // 获取当前按钮对应的号码
                 const nums = getNumbersByCategory(type, text);
-                
+
                 // 如果是拖式模式，显示选择对话框
                 if (currentMode.startsWith('drag')) {
                     pendingButton = {
@@ -126,31 +142,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     };
                     showDragDialog();
                     return; // 等待用户选择
-                } else if (currentMode === 'single') {
-                    // 只在单式模式下检查交集
-                    const finalNumbers = calculateFinalNumbers();
-                    
-                    // 如果没有交集且有多个分类，撤销选择
-                    if (finalNumbers.length === 0 && hasMultipleCategories()) {
-                        this.classList.remove('btn-active');
-                        if (selectedButtons[type]) {
-                            selectedButtons[type].delete(text);
-                        }
-                        alert('该选择与已选条件没有交集，请重新选择');
-                        return;
-                    }
                 }
-                
+
                 // 自动计算并显示结果
                 calculateAll();
-                
+
             } else {
                 // 取消选择
                 this.classList.remove('btn-active');
                 if (selectedButtons[type]) {
                     selectedButtons[type].delete(text);
                 }
-                
+
                 // 如果是拖式模式，从拖胆和拖码中移除
                 if (currentMode.startsWith('drag')) {
                     const nums = getNumbersByCategory(type, text);
@@ -159,15 +162,20 @@ document.addEventListener('DOMContentLoaded', function() {
                         dragCodes.delete(n);
                     });
                 }
-                
+
                 // 自动计算并显示结果
                 calculateAll();
             }
         });
     });
-    
+
+
+
     // 初始显示提示信息
     document.getElementById('statsOutput').textContent = '请选择分类条件...';
+
+    // 初始化杀码下拉框
+    initKillSelect();
 });
 
 // 显示拖式选择对话框
@@ -183,9 +191,9 @@ function hideDragDialog() {
 // 选择拖胆或拖码
 function selectDragType(type) {
     if (!pendingButton) return;
-    
+
     const nums = pendingButton.numbers;
-    
+
     if (type === 'ball') {
         // 添加到拖胆
         nums.forEach(n => dragBalls.add(n));
@@ -193,13 +201,13 @@ function selectDragType(type) {
         // 添加到拖码
         nums.forEach(n => dragCodes.add(n));
     }
-    
+
     // 隐藏对话框
     hideDragDialog();
-    
+
     // 清空待处理按钮
     pendingButton = null;
-    
+
     // 自动计算并显示结果
     calculateAll();
 }
@@ -219,13 +227,13 @@ function hasMultipleCategories() {
 function onModeChange() {
     const oldMode = currentMode;
     currentMode = document.getElementById('calcMode').value;
-    
+
     // 如果从拖式切换到其他模式，或从其他模式切换到拖式，清空拖胆拖码
     if (oldMode.startsWith('drag') !== currentMode.startsWith('drag')) {
         dragBalls.clear();
         dragCodes.clear();
     }
-    
+
     calculateAll();
 }
 
@@ -233,22 +241,22 @@ function onModeChange() {
 function getCombinations(arr, n) {
     if (n === 1) return arr.map(x => [x]);
     if (n > arr.length) return [];
-    
+
     const result = [];
-    
+
     function combine(start, combo) {
         if (combo.length === n) {
             result.push([...combo]);
             return;
         }
-        
+
         for (let i = start; i < arr.length; i++) {
             combo.push(arr[i]);
             combine(i + 1, combo);
             combo.pop();
         }
     }
-    
+
     combine(0, []);
     return result;
 }
@@ -272,11 +280,16 @@ function comboToString(combo) {
 // 生成复式组合
 function generateCompoundCombinations(numbers, n) {
     if (numbers.length < n) return [];
-    
-    const combinations = getCombinations(numbers, n);
+
+    // 先排除杀码
+    const filtered = numbers.filter(num => !killNumbers.has(num));
+
+    if (filtered.length < n) return [];
+
+    const combinations = getCombinations(filtered, n);
     const uniqueCombos = new Set();
     const result = [];
-    
+
     combinations.forEach(combo => {
         if (hasNoDuplicates(combo)) {
             const key = comboToString(combo);
@@ -286,32 +299,32 @@ function generateCompoundCombinations(numbers, n) {
             }
         }
     });
-    
+
     return result;
 }
 
 // 生成拖式组合（第一个分类作为拖胆，其他作为拖码）
 function generateDragCombinations(categories, n) {
     if (categories.length < 2) return [];
-    
+
     const dragBall = categories[0]; // 拖胆
     const dragCode = []; // 拖码
-    
+
     for (let i = 1; i < categories.length; i++) {
         dragCode.push(...categories[i]);
     }
-    
+
     // 去重拖码
     const uniqueDragCode = [...new Set(dragCode)];
-    
+
     const result = [];
     const uniqueCombos = new Set();
-    
+
     // 拖胆中的每个号码
     dragBall.forEach(ball => {
         // 从拖码中选择 n-1 个号码
         const codeCombos = getCombinations(uniqueDragCode, n - 1);
-        
+
         codeCombos.forEach(codeCombo => {
             const combo = [ball, ...codeCombo];
             if (hasNoDuplicates(combo)) {
@@ -323,13 +336,13 @@ function generateDragCombinations(categories, n) {
             }
         });
     });
-    
+
     return result;
 }
 
 // 获取分类的号码
 function getNumbersByCategory(category, value) {
-    switch(category) {
+    switch (category) {
         case 'number':
             // 如果是自定义输入，返回自定义号码
             if (value === '自定义') {
@@ -373,38 +386,44 @@ function getNumbersByCategory(category, value) {
 // 计算最终号码（同类并集，不同类交集）
 function calculateFinalNumbers() {
     let categoryResults = [];
-    
+
     // 遍历每个分类，计算该分类的并集
     for (let category in selectedButtons) {
         if (selectedButtons[category].size > 0) {
             let categoryNumbers = new Set();
-            
+
             // 同类的号码做并集（叠加）
             selectedButtons[category].forEach(value => {
                 const nums = getNumbersByCategory(category, value);
                 nums.forEach(n => categoryNumbers.add(n));
             });
-            
+
             categoryResults.push(Array.from(categoryNumbers));
         }
     }
-    
+
     // 如果没有选择任何按钮
     if (categoryResults.length === 0) {
         return [];
     }
-    
+
     // 如果只有一个分类，直接返回
     if (categoryResults.length === 1) {
-        return categoryResults[0].sort((a, b) => a - b);
+        let result = categoryResults[0].sort((a, b) => a - b);
+        // 排除杀码
+        result = result.filter(n => !killNumbers.has(n));
+        return result;
     }
-    
+
     // 多个分类之间做交集（筛选）
     let result = categoryResults[0];
     for (let i = 1; i < categoryResults.length; i++) {
         result = result.filter(n => categoryResults[i].includes(n));
     }
-    
+
+    // 排除杀码
+    result = result.filter(n => !killNumbers.has(n));
+
     return result.sort((a, b) => a - b);
 }
 
@@ -414,38 +433,45 @@ function clearResult() {
     for (let category in selectedButtons) {
         selectedButtons[category].clear();
     }
-    
+
     // 清空自定义号码
     customNumbers.clear();
-    
+
+    // 清空杀码
+    killNumbers.clear();
+
     // 移除所有按钮的激活状态
     const buttons = document.querySelectorAll('.btn.btn-active');
     buttons.forEach(btn => {
         btn.classList.remove('btn-active');
     });
-    
+
     // 清空显示
     document.getElementById('statsOutput').textContent = '请选择分类条件...';
-    
+
     // 清空结果缓存
     lastResult = {
         mode: 'single',
         numbers: [],
         combinations: []
     };
-    
+
     // 清空拖胆拖码
     dragBalls.clear();
     dragCodes.clear();
-    
+
     // 清空输入框
     document.getElementById('numberInput').value = '';
+    document.getElementById('killInput').value = '';
+
+    // 更新杀码显示
+    updateKillDisplay();
 }
 
 // 复制结果
 function copyResult() {
     let textToCopy = '';
-    
+
     if (lastResult.mode === 'single') {
         // 单式：复制号码
         if (lastResult.numbers.length === 0) {
@@ -461,11 +487,11 @@ function copyResult() {
         }
         textToCopy = lastResult.combinations.map(combo => formatNumbers(combo)).join('\n');
     }
-    
+
     // 复制到剪贴板
     navigator.clipboard.writeText(textToCopy).then(() => {
         alert('复制成功！');
-    }).catch(err => {
+    }).catch(() => {
         // 降级方案：使用传统方法
         const textarea = document.createElement('textarea');
         textarea.value = textToCopy;
@@ -476,7 +502,7 @@ function copyResult() {
         try {
             document.execCommand('copy');
             alert('复制成功！');
-        } catch (e) {
+        } catch (error) {
             alert('复制失败，请手动复制');
         }
         document.body.removeChild(textarea);
@@ -488,7 +514,7 @@ function calculateAll() {
     // 收集所有选中的文字和对应号码
     let selectedItems = [];
     let categoryNumbers = []; // 按分类存储号码
-    
+
     for (let category in selectedButtons) {
         if (selectedButtons[category].size > 0) {
             let categoryNums = new Set();
@@ -503,84 +529,84 @@ function calculateAll() {
             categoryNumbers.push(Array.from(categoryNums).sort((a, b) => a - b));
         }
     }
-    
+
     if (selectedItems.length === 0) {
         document.getElementById('statsOutput').textContent = '请选择分类条件...';
         lastResult = { mode: 'single', numbers: [], combinations: [] };
         return;
     }
-    
+
     let output = '';
-    
+
     // 根据模式计算结果
     if (currentMode === 'single') {
         // 单式：计算交集和并集
         const finalNumbers = calculateFinalNumbers(); // 交集
-        
+
         // 计算并集
         const allNumbersSet = new Set();
         categoryNumbers.forEach(catNums => {
             catNums.forEach(num => allNumbersSet.add(num));
         });
         const unionNumbers = Array.from(allNumbersSet).sort((a, b) => a - b);
-        
+
         if (finalNumbers.length === 0 && unionNumbers.length === 0) {
             document.getElementById('statsOutput').textContent = '统计结果：没有符合条件的号码';
             lastResult = { mode: 'single', numbers: [], combinations: [] };
             return;
         }
-        
+
         // 保存结果用于复制（交集）
         lastResult = {
             mode: 'single',
             numbers: finalNumbers,
             combinations: []
         };
-        
+
         // 显示交集结果
         if (finalNumbers.length > 0) {
             output += `统计交集结果：${formatNumbers(finalNumbers)}，（共${finalNumbers.length}个）\n\n`;
         } else {
             output += `统计交集结果：无交集\n\n`;
         }
-        
+
         // 显示并集结果
         if (unionNumbers.length > 0) {
             output += `统计合集结果：${formatNumbers(unionNumbers)}，（共${unionNumbers.length}个）\n\n`;
         }
-        
+
     } else if (currentMode.startsWith('compound')) {
         // 复式：使用并集（所有选中的号码）
         const n = parseInt(currentMode.replace('compound', ''));
-        
+
         // 获取所有选中的号码（并集）
         const allNumbersSet = new Set();
         categoryNumbers.forEach(catNums => {
             catNums.forEach(num => allNumbersSet.add(num));
         });
         const allNumbers = Array.from(allNumbersSet).sort((a, b) => a - b);
-        
+
         if (allNumbers.length === 0) {
             document.getElementById('statsOutput').textContent = '统计结果：没有选中的号码';
             lastResult = { mode: currentMode, numbers: [], combinations: [] };
             return;
         }
-        
+
         if (allNumbers.length < n) {
             document.getElementById('statsOutput').textContent = `统计结果：号码数量不足（共${allNumbers.length}个），无法生成${n}个号码的组合`;
             lastResult = { mode: currentMode, numbers: [], combinations: [] };
             return;
         }
-        
+
         const combinations = generateCompoundCombinations(allNumbers, n);
-        
+
         // 保存结果用于复制
         lastResult = {
             mode: currentMode,
             numbers: allNumbers,
             combinations: combinations
         };
-        
+
         output += `统计结果（复式${n}）：\n`;
         output += `共${combinations.length}注\n\n`;
         combinations.forEach((combo, index) => {
@@ -592,41 +618,46 @@ function calculateAll() {
             output += `...(还有${combinations.length - 100}注)\n`;
         }
         output += '\n';
-        
+
     } else if (currentMode.startsWith('drag')) {
         // 拖式：使用用户选择的拖胆和拖码
         const n = parseInt(currentMode.replace('drag', ''));
-        
-        const dragBallArray = Array.from(dragBalls).sort((a, b) => a - b);
-        const dragCodeArray = Array.from(dragCodes).sort((a, b) => a - b);
-        
+
+        // 排除杀码
+        const dragBallArray = Array.from(dragBalls)
+            .filter(num => !killNumbers.has(num))
+            .sort((a, b) => a - b);
+        const dragCodeArray = Array.from(dragCodes)
+            .filter(num => !killNumbers.has(num))
+            .sort((a, b) => a - b);
+
         if (dragBallArray.length === 0) {
             document.getElementById('statsOutput').textContent = '拖式需要至少选择1个拖胆';
             lastResult = { mode: currentMode, numbers: [], combinations: [] };
             return;
         }
-        
+
         if (dragCodeArray.length === 0) {
             document.getElementById('statsOutput').textContent = '拖式需要至少选择1个拖码';
             lastResult = { mode: currentMode, numbers: [], combinations: [] };
             return;
         }
-        
+
         if (dragCodeArray.length < n - 1) {
-            document.getElementById('statsOutput').textContent = `拖式${n}需要至少${n-1}个拖码（当前只有${dragCodeArray.length}个）`;
+            document.getElementById('statsOutput').textContent = `拖式${n}需要至少${n - 1}个拖码（当前只有${dragCodeArray.length}个）`;
             lastResult = { mode: currentMode, numbers: [], combinations: [] };
             return;
         }
-        
+
         // 生成拖式组合
         const combinations = [];
         const uniqueCombos = new Set();
-        
+
         // 对每个拖胆号码
         dragBallArray.forEach(ball => {
             // 从拖码中选择 n-1 个号码
             const codeCombos = getCombinations(dragCodeArray, n - 1);
-            
+
             codeCombos.forEach(codeCombo => {
                 const combo = [ball, ...codeCombo];
                 // 检查是否有重复号码
@@ -639,20 +670,20 @@ function calculateAll() {
                 }
             });
         });
-        
+
         if (combinations.length === 0) {
             document.getElementById('statsOutput').textContent = `统计结果：拖胆和拖码有重复号码，无法生成有效组合`;
             lastResult = { mode: currentMode, numbers: [], combinations: [] };
             return;
         }
-        
+
         // 保存结果用于复制
         lastResult = {
             mode: currentMode,
             numbers: [],
             combinations: combinations
         };
-        
+
         output += `统计结果（拖式${n}）：\n`;
         output += `拖胆：${formatNumbers(dragBallArray)}，（共${dragBallArray.length}个）\n`;
         output += `拖码：${formatNumbers(dragCodeArray)}，（共${dragCodeArray.length}个）\n`;
@@ -667,13 +698,19 @@ function calculateAll() {
         }
         output += '\n';
     }
-    
+
     // 显示选择条件及各自对应的号码
     output += `选择条件\n`;
     selectedItems.forEach(item => {
         output += `${item.text}：${formatNumbers(item.numbers)}，（共${item.numbers.length}个）\n`;
     });
-    
+
+    // 显示杀码（如果有）
+    if (killNumbers.size > 0) {
+        const killArray = Array.from(killNumbers).sort((a, b) => a - b);
+        output += `杀码：${formatNumbers(killArray)}，（共${killArray.length}个）\n`;
+    }
+
     document.getElementById('statsOutput').textContent = output;
 }
 
@@ -691,26 +728,26 @@ function formatNumbers(numbers) {
 // 插入自定义号码
 function insertCustomNumbers() {
     const input = document.getElementById('numberInput').value.trim();
-    
+
     if (!input) {
         alert('请输入号码');
         return;
     }
-    
+
     // 解析输入的号码
     const numbers = parseNumberInput(input);
-    
+
     if (numbers.length === 0) {
         alert('输入格式错误，请检查');
         return;
     }
-    
+
     // 保存自定义号码
     customNumbers = new Set(numbers);
-    
+
     // 添加到selectedButtons中
     selectedButtons.number.add('自定义');
-    
+
     // 创建或更新自定义按钮
     let customBtn = document.getElementById('customNumberBtn');
     if (!customBtn) {
@@ -723,9 +760,9 @@ function insertCustomNumbers() {
         customBtn.textContent = '自定义';
         customBtn.style.marginRight = '10px';
         buttonRow.appendChild(customBtn);
-        
+
         // 添加点击事件
-        customBtn.addEventListener('click', function() {
+        customBtn.addEventListener('click', function () {
             if (this.classList.contains('btn-active')) {
                 this.classList.remove('btn-active');
                 selectedButtons.number.delete('自定义');
@@ -739,10 +776,10 @@ function insertCustomNumbers() {
     } else {
         customBtn.classList.add('btn-active');
     }
-    
+
     // 清空输入框
     document.getElementById('numberInput').value = '';
-    
+
     // 自动计算结果
     calculateAll();
 }
@@ -750,21 +787,21 @@ function insertCustomNumbers() {
 // 解析用户输入的号码
 function parseNumberInput(input) {
     const numbers = new Set();
-    
+
     // 先处理范围表达式（使用~或-）
     // 将~和-都作为范围符号处理
     const rangePattern = /(\d+)\s*[-~]\s*(\d+)/g;
     let match;
-    
+
     // 先处理所有范围表达式
     while ((match = rangePattern.exec(input)) !== null) {
         const start = parseInt(match[1]);
         const end = parseInt(match[2]);
-        
+
         if (!isNaN(start) && !isNaN(end)) {
             const min = Math.min(start, end);
             const max = Math.max(start, end);
-            
+
             for (let i = min; i <= max; i++) {
                 if (i >= 1 && i <= 49) {
                     numbers.add(i);
@@ -772,25 +809,157 @@ function parseNumberInput(input) {
             }
         }
     }
-    
+
     // 移除已处理的范围表达式，只保留单个号码
     let remaining = input.replace(/(\d+)\s*[-~]\s*(\d+)/g, '');
-    
+
     // 分割剩余的号码（使用逗号、点、空格作为分隔符）
     const parts = remaining.split(/[,.\s]+/);
-    
+
     for (let part of parts) {
         part = part.trim();
-        
+
         if (!part) continue;
-        
+
         // 单个号码
         const num = parseInt(part);
-        
+
         if (!isNaN(num) && num >= 1 && num <= 49) {
             numbers.add(num);
         }
     }
-    
+
     return Array.from(numbers).sort((a, b) => a - b);
+}
+
+// 清空所有杀码
+function clearAllKill() {
+    killConditions = [];
+    updateTotalKillNumbers();
+    renderKillList();
+}
+
+// 渲染杀码列表
+function renderKillList() {
+    const container = document.getElementById('killList');
+    container.innerHTML = '';
+
+    killConditions.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'kill-tag';
+        div.style.cssText = 'background: #ffeba7; padding: 5px 10px; border-radius: 15px; font-size: 12px; display: flex; align-items: center; gap: 5px; border: 1px solid #e0c060;';
+        div.innerHTML = `
+            <span>${item.label} (${item.numbers.length}个)</span>
+            <span onclick="removeKillCondition(${item.id})" style="cursor: pointer; color: #999; font-weight: bold; margin-left: 5px;">✕</span>
+        `;
+        container.appendChild(div);
+    });
+}
+
+// 更新总杀码
+function updateTotalKillNumbers() {
+    killNumbers.clear();
+    killConditions.forEach(item => {
+        item.numbers.forEach(n => killNumbers.add(n));
+    });
+    calculateAll();
+}
+
+// 兼容旧函数名（如果有调用）
+// 兼容旧函数名（如果有调用）
+function clearKillNumbers() {
+    clearAllKill();
+}
+
+// 初始化杀码下拉框
+function initKillSelect() {
+    const select = document.getElementById('killSelect');
+    if (!select) return;
+
+    select.innerHTML = '<option value="">-- 快捷选项 --</option>';
+
+    const groups = {
+        zodiac: '生肖',
+        element: '五行',
+        wave: '波色',
+        head: '头数',
+        tail: '尾数',
+        general: '两面'
+    };
+
+    for (let type in groups) {
+        if (killOptionsData[type]) {
+            const group = document.createElement('optgroup');
+            group.label = groups[type];
+
+            killOptionsData[type].forEach(val => {
+                const option = document.createElement('option');
+                option.value = `${type}:${val}`;
+                option.textContent = val;
+                group.appendChild(option);
+            });
+
+            select.appendChild(group);
+        }
+    }
+}
+
+// 统一添加杀码（支持输入框和下拉框）
+function addUnifiedKill() {
+    const input = document.getElementById('killInput');
+    const select = document.getElementById('killSelect');
+
+    const inputValue = input.value.trim();
+    const selectValue = select.value;
+
+    let added = false;
+
+    // 1. 处理输入框内容
+    if (inputValue) {
+        const nums = parseNumberInput(inputValue);
+        if (nums.length > 0) {
+            killConditions.push({
+                id: nextKillId++,
+                type: 'manual',
+                label: `号码: ${inputValue}`,
+                numbers: nums
+            });
+            added = true;
+            input.value = ''; // 清空输入框
+        } else {
+            alert('输入的号码格式不正确');
+        }
+    }
+
+    // 2. 处理下拉框内容
+    if (selectValue) {
+        const [category, value] = selectValue.split(':');
+
+        // 映射通用分类到具体分类
+        let realCategory = category;
+        if (category === 'general') {
+            if (['大', '小'].includes(value)) realCategory = 'size';
+            else if (['单', '双'].includes(value)) realCategory = 'parity';
+            else if (['野兽', '家畜'].includes(value)) realCategory = 'beast';
+            else if (['尾大', '尾小'].includes(value)) realCategory = 'tail-size';
+        }
+
+        const nums = getNumbersByCategory(realCategory, value);
+
+        killConditions.push({
+            id: nextKillId++,
+            type: category,
+            label: `${value}`,
+            numbers: nums
+        });
+        added = true;
+        select.value = ''; // 重置下拉框
+    }
+
+    if (added) {
+        updateTotalKillNumbers();
+        renderKillList();
+    } else if (!inputValue && !selectValue) {
+        alert('请先输入号码或选择条件');
+    }
 }
