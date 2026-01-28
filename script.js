@@ -78,8 +78,9 @@ let selectedButtons = {
     'tail-size': new Set()  // 尾大/尾小
 };
 
-// 自定义输入的号码
-let customNumbers = new Set();
+// 自定义输入的号码 (不再单独存储，直接选中按钮)
+// let customNumbers = new Set(); 
+
 
 // 杀码号码
 let killNumbers = new Set();
@@ -182,11 +183,32 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
+    // 为号码输入框添加回车事件
+    const numberInput = document.getElementById('numberInput');
+    if (numberInput) {
+        numberInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                insertCustomNumbers();
+            }
+        });
+    }
+
     // 初始显示提示信息
     document.getElementById('statsOutput').textContent = '请选择分类条件...';
 
+
     // 初始化杀码下拉框
     initKillSelect();
+
+    // 为生肖输入框添加回车事件
+    const zodiacInput = document.getElementById('zodiacInput');
+    if (zodiacInput) {
+        zodiacInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                addCustomZodiac();
+            }
+        });
+    }
 });
 
 // 显示拖式选择对话框
@@ -295,10 +317,6 @@ function generateCompoundCombinations(numbers, n) {
 function getNumbersByCategory(category, value) {
     switch (category) {
         case 'number':
-            // 如果是自定义输入，返回自定义号码
-            if (value === '自定义') {
-                return Array.from(customNumbers).sort((a, b) => a - b);
-            }
             return [parseInt(value)];
         case 'zodiac':
             return numberData.zodiac[value] || [];
@@ -385,8 +403,8 @@ function clearResult() {
         selectedButtons[category].clear();
     }
 
-    // 清空自定义号码
-    customNumbers.clear();
+    // 清空自定义号码 (逻辑已移除)
+
 
     // 清空所有杀码（包括killNumbers和killConditions）
     clearAllKill();
@@ -470,7 +488,8 @@ function calculateAll() {
                 const nums = getNumbersByCategory(category, text);
                 selectedItems.push({
                     text: text,
-                    numbers: nums
+                    numbers: nums,
+                    category: category
                 });
                 nums.forEach(n => categoryNums.add(n));
             });
@@ -652,9 +671,23 @@ function calculateAll() {
         output += '\n';
     }
 
-    // 显示选择条件及各自对应的号码
+    // 显示选择条件
     output += `选择条件\n`;
-    selectedItems.forEach(item => {
+
+    // 1. 处理号码类（统一合并显示）
+    const numberItems = selectedItems.filter(item => item.category === 'number');
+    if (numberItems.length > 0) {
+        const allNums = new Set();
+        numberItems.forEach(item => {
+            item.numbers.forEach(n => allNums.add(n));
+        });
+        const sortedNums = Array.from(allNums).sort((a, b) => a - b);
+        output += `号码：${formatNumbers(sortedNums)}，（共${sortedNums.length}个）\n`;
+    }
+
+    // 2. 处理其他分类（维持原样逐个显示）
+    const otherItems = selectedItems.filter(item => item.category !== 'number');
+    otherItems.forEach(item => {
         output += `${item.text}：${formatNumbers(item.numbers)}，（共${item.numbers.length}个）\n`;
     });
 
@@ -678,9 +711,10 @@ function formatNumbers(numbers) {
 }
 
 
-// 插入自定义号码
+// 插入自定义号码（改为选中已有按钮）
 function insertCustomNumbers() {
-    const input = document.getElementById('numberInput').value.trim();
+    const inputField = document.getElementById('numberInput');
+    const input = inputField.value.trim();
 
     if (!input) {
         alert('请输入号码');
@@ -695,90 +729,23 @@ function insertCustomNumbers() {
         return;
     }
 
-    // 保存自定义号码
-    customNumbers = new Set(numbers);
+    // 获取所有号码按钮
+    const numberButtons = document.querySelectorAll('.btn[data-type="number"]');
 
-    // 添加到selectedButtons中
-    selectedButtons.number.add('自定义');
-
-    // 创建或更新自定义按钮
-    let customBtn = document.getElementById('customNumberBtn');
-    if (!customBtn) {
-        // 创建自定义按钮 - 找到"号码"分类的按钮行
-
-        // 优化：使用缓存的Section，避免重复查询DOM
-        if (!cachedNumberSection) {
-            const categorySections = document.querySelectorAll('.category-section');
-            for (let section of categorySections) {
-                const title = section.querySelector('.category-title');
-                if (title && title.textContent.trim() === '号码') {
-                    cachedNumberSection = section;
-                    break;
+    numbers.forEach(num => {
+        const targetText = formatNumber(num);
+        numberButtons.forEach(btn => {
+            if (btn.textContent.trim() === targetText) {
+                // 只有在未激活状态下才触发点击
+                if (!btn.classList.contains('btn-active')) {
+                    btn.click();
                 }
             }
-        }
-
-        if (!cachedNumberSection) {
-            console.error('找不到号码分类');
-            return;
-        }
-
-        const buttonRow = cachedNumberSection.querySelector('.button-row');
-        if (!buttonRow) {
-            console.error('找不到按钮行');
-            return;
-        }
-
-        customBtn = document.createElement('button');
-        customBtn.id = 'customNumberBtn';
-        customBtn.className = 'btn btn-active';
-        customBtn.setAttribute('data-type', 'number');
-        customBtn.textContent = '自定义';
-        customBtn.style.marginRight = '10px';
-        buttonRow.appendChild(customBtn);
-
-        // 添加点击事件
-        customBtn.addEventListener('click', function () {
-            if (this.classList.contains('btn-active')) {
-                this.classList.remove('btn-active');
-                selectedButtons.number.delete('自定义');
-                customNumbers.clear();
-
-                // 如果是拖式模式，从拖胆和拖码中移除
-                if (currentMode.startsWith('drag')) {
-                    const currentNumbers = Array.from(customNumbers);
-                    currentNumbers.forEach(n => {
-                        dragBalls.delete(n);
-                        dragCodes.delete(n);
-                    });
-                }
-            } else {
-                this.classList.add('btn-active');
-                selectedButtons.number.add('自定义');
-            }
-            calculateAll();
         });
-    } else {
-        // 按钮已存在，确保它是激活状态
-        customBtn.classList.add('btn-active');
-    }
+    });
 
     // 清空输入框
-    document.getElementById('numberInput').value = '';
-
-    // 如果是拖式模式，显示选择对话框
-    if (currentMode.startsWith('drag')) {
-        pendingButton = {
-            element: customBtn,
-            type: 'number',
-            text: '自定义',
-            numbers: numbers
-        };
-        showDragDialog();
-    } else {
-        // 非拖式模式，直接计算结果
-        calculateAll();
-    }
+    inputField.value = '';
 }
 
 // 解析用户输入的号码
@@ -952,3 +919,46 @@ function addUnifiedKill() {
         alert('请先输入号码或选择条件');
     }
 }
+
+// 提取生肖并选中
+function addCustomZodiac() {
+    const inputField = document.getElementById('zodiacInput');
+    const input = inputField.value.trim();
+    if (!input) {
+        alert('请输入生肖');
+        return;
+    }
+
+    const allZodiacs = ['蛇', '龙', '兔', '虎', '鼠', '猴', '猪', '狗', '鸡', '羊', '马', '牛'];
+    // 提取输入中存在的生肖
+    const found = allZodiacs.filter(z => input.includes(z));
+
+    if (found.length === 0) {
+        alert('未从输入中提取到有效生肖');
+        return;
+    }
+
+    // 获取所有生肖按钮
+    const zodiacButtons = document.querySelectorAll('.btn[data-type="zodiac"]');
+    let addedCount = 0;
+
+    found.forEach(z => {
+        zodiacButtons.forEach(btn => {
+            if (btn.textContent.trim() === z) {
+                // 只有在未激活状态下才触发点击
+                if (!btn.classList.contains('btn-active')) {
+                    btn.click();
+                    addedCount++;
+                }
+            }
+        });
+    });
+
+    // 如果所有提取到的生肖都已经选中，给出提示
+    if (addedCount === 0) {
+        // 既然已经选中了，就不报错，直接清空就好
+    }
+
+    inputField.value = '';
+}
+
