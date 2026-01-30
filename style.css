@@ -1,0 +1,506 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Microsoft YaHei", Arial, sans-serif;
+    background-color: #f0f0f0;
+    padding: 10px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.category-section {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #fafafa;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.category-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #333;
+    border-bottom: 2px solid #d4a574;
+    padding-bottom: 5px;
+}
+
+.button-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: 1px solid #999;
+    background: #f5f5f5;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+    white-space: nowrap;
+    border-radius: 4px;
+    min-width: 60px;
+}
+
+.btn:hover {
+    background: #e0e0e0;
+    transform: translateY(-1px);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-active {
+    background: #d4a574 !important;
+    color: white !important;
+    border-color: #b8935f !important;
+}
+
+.btn-active:hover {
+    background: #c49464 !important;
+    transform: translateY(-1px);
+}
+
+.btn-red {
+    background: #ff4444;
+    color: white;
+    border-color: #cc0000;
+}
+
+.btn-blue {
+    background: #4444ff;
+    color: white;
+    border-color: #0000cc;
+}
+
+.btn-green {
+    background: #44ff44;
+    color: #333;
+    border-color: #00cc00;
+}
+
+.input-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px;
+    background: #fafafa;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.input-section label {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.input-section input {
+    flex: 1;
+    min-width: 200px;
+    padding: 8px;
+    border: 1px solid #999;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.input-section .hint {
+    color: #666;
+    font-size: 12px;
+    flex-basis: 100%;
+}
+
+.btn-insert {
+    padding: 8px 20px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.btn-insert:hover {
+    background: #45a049;
+}
+
+.result-area {
+    margin-bottom: 15px;
+}
+
+#resultText {
+    width: 100%;
+    height: 120px;
+    padding: 10px;
+    border: 2px solid #999;
+    border-radius: 3px;
+    font-size: 14px;
+    resize: vertical;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.action-buttons select {
+    padding: 8px 15px;
+    font-size: 13px;
+    border: 1px solid #999;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+}
+
+/* 拖式选择对话框 */
+.drag-dialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.drag-dialog-content {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    min-width: 300px;
+}
+
+.drag-btn {
+    padding: 12px 30px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.drag-btn-ball {
+    background: #ff6b6b;
+    color: white;
+}
+
+.drag-btn-ball:hover {
+    background: #ff5252;
+    transform: translateY(-2px);
+}
+
+.drag-btn-code {
+    background: #4ecdc4;
+    color: white;
+}
+
+.drag-btn-code:hover {
+    background: #45b7af;
+    transform: translateY(-2px);
+}
+
+.action-btn {
+    padding: 8px 15px;
+    border: 1px solid #666;
+    background: #e8e8e8;
+    cursor: pointer;
+    font-size: 13px;
+    border-radius: 3px;
+    transition: all 0.2s;
+}
+
+.action-btn:hover {
+    background: #d0d0d0;
+}
+
+.btn-highlight {
+    background: #ffd700;
+    border-color: #ccaa00;
+}
+
+.statistics {
+    margin-top: 15px;
+    padding: 15px;
+    background: #fafafa;
+    border: 2px solid #999;
+    border-radius: 3px;
+    min-height: 150px;
+}
+
+#statsOutput {
+    font-size: 13px;
+    line-height: 1.8;
+    white-space: pre-wrap;
+}
+
+@media (max-width: 768px) {
+    /* 手机端 */
+    body {
+        padding: 5px;
+    }
+    
+    .container {
+        padding: 10px;
+    }
+    
+    h2 {
+        font-size: 18px !important;
+        margin-bottom: 15px !important;
+    }
+    
+    .button-row {
+        gap: 5px;
+    }
+    
+    .btn {
+        padding: 8px 10px;
+        font-size: 12px;
+        min-width: 45px;
+    }
+    
+    .input-section {
+        justify-content: center;
+        padding: 10px;
+        gap: 5px;
+    }
+    
+    .input-section input {
+        width: 60px;
+        padding: 6px;
+        font-size: 12px;
+    }
+    
+    .input-section label {
+        font-size: 12px;
+    }
+    
+    .btn-insert {
+        padding: 6px 15px;
+        font-size: 12px;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        gap: 10px;
+        align-items: stretch;
+    }
+    
+    .action-buttons > div {
+        width: 100%;
+        margin-left: 0 !important;
+        justify-content: center;
+    }
+    
+    .action-buttons select {
+        width: 100%;
+        padding: 10px;
+        font-size: 14px;
+    }
+    
+    .action-btn {
+        flex: 1;
+        padding: 10px;
+        font-size: 14px;
+    }
+    
+    .category-section {
+        padding: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .category-title {
+        font-size: 14px;
+    }
+    
+    .statistics {
+        padding: 10px;
+        min-height: 100px;
+    }
+    
+    #statsOutput {
+        font-size: 12px;
+        line-height: 1.6;
+    }
+    
+    .drag-dialog-content {
+        padding: 20px;
+        min-width: 280px;
+        max-width: 90%;
+    }
+    
+    .drag-dialog-content p {
+        font-size: 14px !important;
+    }
+    
+    .drag-btn {
+        padding: 12px 25px;
+        font-size: 14px;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    /* 平板端 */
+    .container {
+        max-width: 900px;
+        padding: 20px;
+    }
+    
+    .btn {
+        padding: 9px 16px;
+        font-size: 13px;
+        min-width: 55px;
+    }
+    
+    .button-row {
+        gap: 6px;
+    }
+    
+    .category-section {
+        padding: 12px;
+    }
+    
+    .action-buttons select {
+        font-size: 14px;
+    }
+    
+    #statsOutput {
+        font-size: 13px;
+    }
+}
+
+@media (min-width: 1025px) {
+    /* 电脑端 */
+    .container {
+        max-width: 1200px;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+}
+
+/* 横屏手机优化 */
+@media (max-width: 768px) and (orientation: landscape) {
+    .category-section {
+        margin-bottom: 10px;
+    }
+    
+    .statistics {
+        min-height: 80px;
+    }
+}
+
+/* 超小屏幕（小于375px） */
+@media (max-width: 374px) {
+    .btn {
+        padding: 6px 8px;
+        font-size: 11px;
+        min-width: 40px;
+    }
+    
+    .button-row {
+        gap: 3px;
+    }
+    
+    h2 {
+        font-size: 16px !important;
+    }
+    
+    .drag-dialog-content {
+        padding: 15px;
+        min-width: 260px;
+    }
+    
+    .drag-btn {
+        padding: 10px 20px;
+        font-size: 13px;
+    }
+}
+
+/* 大屏幕优化（超过1440px） */
+@media (min-width: 1441px) {
+    .container {
+        max-width: 1400px;
+    }
+    
+    .btn {
+        padding: 12px 24px;
+        font-size: 15px;
+    }
+    
+    .category-title {
+        font-size: 18px;
+    }
+    
+    #statsOutput {
+        font-size: 14px;
+    }
+}
+
+/* 触摸设备优化 */
+@media (hover: none) and (pointer: coarse) {
+    .btn {
+        padding: 12px 16px;
+        min-height: 44px; /* iOS推荐的最小触摸目标 */
+    }
+    
+    .action-btn {
+        min-height: 44px;
+        padding: 10px 20px;
+    }
+    
+    .btn-insert {
+        min-height: 44px;
+    }
+    
+    .drag-btn {
+        min-height: 50px;
+        padding: 15px 30px;
+    }
+}
+
+/* 打印样式 */
+@media print {
+    body {
+        background: white;
+    }
+    
+    .action-buttons,
+    .input-section,
+    .drag-dialog {
+        display: none !important;
+    }
+    
+    .container {
+        box-shadow: none;
+        max-width: 100%;
+    }
+    
+    .btn {
+        border: 1px solid #000;
+    }
+}
