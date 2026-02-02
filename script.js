@@ -139,26 +139,26 @@ const filterMap = {
 };
 
 const filterCategories = {
-    'wave': ['red', 'blue', 'green'],
     'bigSmall': ['big', 'small'],
     'oddEven': ['odd', 'even'],
     'wildDomestic': ['wild', 'domestic'],
     'tailBigSmall': ['tailBig', 'tailSmall'],
+    'wave': ['red', 'blue', 'green'],
+    'element': ['gold', 'wood', 'water', 'fire', 'earth'],
     'head': ['head0', 'head1', 'head2', 'head3', 'head4'],
     'tail': ['tail0', 'tail1', 'tail2', 'tail3', 'tail4', 'tail5', 'tail6', 'tail7', 'tail8', 'tail9'],
-    'element': ['gold', 'wood', 'water', 'fire', 'earth'],
     'zodiac': ['蛇', '龙', '兔', '虎', '牛', '鼠', '猪', '狗', '鸡', '猴', '羊', '马']
 };
 
 const categoryNames = {
-    'wave': '波色',
     'bigSmall': '大小',
     'oddEven': '单双',
     'wildDomestic': '野家',
     'tailBigSmall': '尾大小',
+    'wave': '波色',
+    'element': '五行',
     'head': '头数',
     'tail': '尾数',
-    'element': '五行',
     'zodiac': '生肖'
 };
 
