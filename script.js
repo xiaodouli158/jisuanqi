@@ -448,15 +448,6 @@ function initOperationButtons() {
         }
     });
 
-    // 清空杀码
-    const clearKillBtn = document.getElementById('clearKillBtn');
-    if (clearKillBtn) {
-        clearKillBtn.addEventListener('click', () => {
-            conditions = conditions.filter(c => c.type !== 'exclude');
-            updateResultDisplay();
-            updateBallStates();
-        });
-    }
 }
 
 // 初始化模式选择
@@ -607,6 +598,7 @@ function clearAllConditions() {
     }
 
     updateResultDisplay();
+    updateBallStates();
 }
 
 // 清除预览高亮（可选是否清除输入框）
@@ -661,36 +653,6 @@ function updateBallStates() {
             ball.classList.add('killed');
         }
     }
-
-    // 更新杀码区域显示
-    updateKillDisplay();
-}
-
-
-
-// 更新杀码显示
-function updateKillDisplay() {
-    const killSection = document.getElementById('killSection');
-    const killTags = document.getElementById('killTags');
-    const excludeConditions = conditions.filter(c => c.type === 'exclude');
-
-    if (excludeConditions.length === 0) {
-        killSection.style.display = 'none';
-        return;
-    }
-
-    killSection.style.display = 'block';
-    killTags.innerHTML = '';
-
-    excludeConditions.forEach(item => {
-        const tag = document.createElement('div');
-        tag.className = 'kill-tag';
-        tag.innerHTML = `
-            <span>杀: ${item.label} (${item.numbers.length}个)</span>
-            <span class="remove-kill" onclick="removeCondition(${item.id})">✕</span>
-        `;
-        killTags.appendChild(tag);
-    });
 }
 
 // ========== 核心计算逻辑 ==========

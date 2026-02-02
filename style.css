@@ -369,70 +369,6 @@ body {
 
 
 
-/* ========== 杀码区域 ========== */
-.kill-section {
-    margin-bottom: 15px;
-    padding: 10px 15px;
-    background: #f8f9fa;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-}
-
-.kill-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-.kill-header h4 {
-    font-size: 14px;
-    font-weight: bold;
-    color: #666;
-}
-
-
-.clear-kill-btn {
-    padding: 5px 12px;
-    font-size: 12px;
-    background: #6c757d;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.clear-kill-btn:hover {
-    background: #5a6268;
-}
-
-.kill-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.kill-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 5px 12px;
-    background: #f0f0f0;
-    border: 1px solid #ddd;
-    border-radius: 15px;
-    font-size: 12px;
-    color: #666;
-}
-
-.remove-kill {
-    cursor: pointer;
-    font-weight: bold;
-}
-
-.remove-kill:hover {
-    color: #333;
-}
-
 /* ========== 拖式对话框 ========== */
 .drag-dialog {
     position: fixed;
@@ -686,7 +622,6 @@ body {
 
     .filter-section,
     .operation-panel,
-    .kill-section,
     .drag-dialog,
     .drag-type-modal {
         display: none !important;
