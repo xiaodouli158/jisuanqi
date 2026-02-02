@@ -1,3 +1,4 @@
+/* 全局样式重置 */
 * {
     margin: 0;
     padding: 0;
@@ -10,167 +11,429 @@ body {
     padding: 10px;
 }
 
-.container {
-    max-width: 1200px;
+.app-container {
+    max-width: 800px;
     margin: 0 auto;
     background: white;
     padding: 15px;
     border-radius: 5px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.category-section {
-    margin-bottom: 20px;
+/* ========== 顶部统计结果区域 ========== */
+.result-section {
+    margin-bottom: 15px;
     padding: 15px;
     background: #fafafa;
     border-radius: 5px;
     border: 1px solid #ddd;
 }
 
-.category-title {
-    font-size: 16px;
-    font-weight: bold;
-    margin-bottom: 10px;
-    color: #333;
-    border-bottom: 2px solid #d4a574;
-    padding-bottom: 5px;
+.result-section.top-result {
+    border: 2px solid #d4a574;
 }
 
-.button-row {
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.header-left-group,
+.header-right-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header-left-group h3 {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+}
+
+.mode-selector {
+    flex-shrink: 0;
+}
+
+.mode-select {
+    padding: 8px 15px;
+    font-size: 14px;
+    border: 1px solid #999;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+}
+
+.mode-select:focus {
+    outline: none;
+    border-color: #d4a574;
+}
+
+.action-btn-small.filter-btn,
+.action-btn-small {
+    padding: 6px 12px;
+    border: 1px solid #999;
+    background: #f5f5f5;
+    font-size: 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #333;
+}
+
+.action-btn-small.filter-btn:hover,
+.action-btn-small:hover {
+    background: #e0e0e0;
+}
+
+.result-content {
+    font-size: 14px;
+    line-height: 1.8;
+    white-space: pre-wrap;
+    color: #333;
+    min-height: 80px;
+}
+
+.result-content .placeholder-text {
+    color: #999;
+    font-style: italic;
+}
+
+/* ========== 整合选号盘 ========== */
+.integrated-selector {
+    margin-bottom: 15px;
+    padding: 15px;
+    background: #fafafa;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+/* 操作面板 */
+.operation-panel {
+    margin-bottom: 15px;
+}
+
+.operation-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.input-wrapper {
+    flex: 1;
+    min-width: 200px;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-icon {
+    position: absolute;
+    left: 10px;
+    color: #999;
+    font-size: 14px;
+    pointer-events: none;
+}
+
+.custom-input {
+    width: 100%;
+    padding: 10px 10px 10px 35px;
+    border: 1px solid #999;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.custom-input:focus {
+    outline: none;
+    border-color: #d4a574;
+}
+
+.custom-input::placeholder {
+    color: #999;
+}
+
+.op-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+}
+
+.op-btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn-icon {
+    font-size: 14px;
+}
+
+.op-btn-add,
+.op-btn-kill,
+.op-btn-copy {
+    background: #e8e8e8;
+    color: #333;
+    border: 1px solid #999;
+}
+
+.op-btn-add:hover,
+.op-btn-kill:hover,
+.op-btn-copy:hover {
+    background: #d0d0d0;
+}
+
+/* 号码网格容器 */
+.number-grid-container {
+    padding: 10px 0;
+}
+
+/* 号码网格 */
+.number-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    justify-items: center;
+}
+
+.number-ball {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    font-weight: bold;
+    background: white;
+    border: 2px solid #ddd;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.number-ball:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    border-color: #999;
+}
+
+.number-ball .ball-number {
+    font-size: 18px;
+    font-weight: bold;
+    line-height: 1;
+}
+
+.number-ball .ball-zodiac {
+    font-size: 12px;
+    margin-top: 0;
+    opacity: 0.85;
+    font-weight: 500;
+}
+
+
+/* 波色 - 使用彩色字体和边框区分 */
+.number-ball.ball-red {
+    border-color: #e74c3c;
+}
+
+.number-ball.ball-red .ball-number,
+.number-ball.ball-red .ball-zodiac {
+    color: #e74c3c;
+}
+
+.number-ball.ball-blue {
+    border-color: #3498db;
+}
+
+.number-ball.ball-blue .ball-number,
+.number-ball.ball-blue .ball-zodiac {
+    color: #3498db;
+}
+
+.number-ball.ball-green {
+    border-color: #27ae60;
+}
+
+.number-ball.ball-green .ball-number,
+.number-ball.ball-green .ball-zodiac {
+    color: #27ae60;
+}
+
+.number-ball.highlight {
+    background: #d4a574;
+    border-color: #b8935f;
+    border-width: 2px;
+    box-shadow: 0 2px 8px rgba(212, 165, 116, 0.5);
+}
+
+/* 高亮时保持原有字体颜色 */
+.number-ball.ball-red.highlight .ball-number,
+.number-ball.ball-red.highlight .ball-zodiac {
+    color: #e74c3c;
+}
+
+.number-ball.ball-blue.highlight .ball-number,
+.number-ball.ball-blue.highlight .ball-zodiac {
+    color: #3498db;
+}
+
+.number-ball.ball-green.highlight .ball-number,
+.number-ball.ball-green.highlight .ball-zodiac {
+    color: #27ae60;
+}
+
+
+
+.number-ball.killed {
+    opacity: 0.25;
+}
+
+.number-ball.killed::after {
+    content: '';
+    position: absolute;
+    width: 70%;
+    height: 2px;
+    background: #999;
+    transform: rotate(-45deg);
+}
+
+
+/* ========== 筛选区域 ========== */
+.filter-section {
+    margin-bottom: 10px;
+    padding: 10px 15px;
+    background: #fafafa;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.filter-label {
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+    min-width: 40px;
+    flex-shrink: 0;
+}
+
+.filter-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    flex: 1;
+}
+
+.filter-btn {
+    padding: 8px 14px;
+    border: 1px solid #999;
+    background: #f5f5f5;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+    border-radius: 4px;
+    min-width: 45px;
+    text-align: center;
+}
+
+.filter-btn:hover {
+    background: #e0e0e0;
+    transform: translateY(-1px);
+}
+
+.filter-btn.active {
+    background: #d4a574;
+    color: white;
+    border-color: #b8935f;
+}
+
+/* 波色按钮样式已统一应用普通按钮样式 */
+
+
+
+
+
+/* ========== 杀码区域 ========== */
+.kill-section {
+    margin-bottom: 15px;
+    padding: 10px 15px;
+    background: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.kill-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.kill-header h4 {
+    font-size: 14px;
+    font-weight: bold;
+    color: #666;
+}
+
+
+.clear-kill-btn {
+    padding: 5px 12px;
+    font-size: 12px;
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.clear-kill-btn:hover {
+    background: #5a6268;
+}
+
+.kill-tags {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
 }
 
-.btn {
-    padding: 10px 20px;
-    border: 1px solid #999;
-    background: #f5f5f5;
-    cursor: pointer;
-    font-size: 14px;
-    transition: all 0.2s;
-    white-space: nowrap;
-    border-radius: 4px;
-    min-width: 60px;
-}
-
-.btn:hover {
-    background: #e0e0e0;
-    transform: translateY(-1px);
-}
-
-.btn:active {
-    transform: translateY(0);
-}
-
-.btn-active {
-    background: #d4a574 !important;
-    color: white !important;
-    border-color: #b8935f !important;
-}
-
-.btn-active:hover {
-    background: #c49464 !important;
-    transform: translateY(-1px);
-}
-
-.btn-red {
-    background: #ff4444;
-    color: white;
-    border-color: #cc0000;
-}
-
-.btn-blue {
-    background: #4444ff;
-    color: white;
-    border-color: #0000cc;
-}
-
-.btn-green {
-    background: #44ff44;
-    color: #333;
-    border-color: #00cc00;
-}
-
-.input-section {
-    display: flex;
+.kill-tag {
+    display: inline-flex;
     align-items: center;
-    gap: 10px;
-    padding: 15px;
-    background: #fafafa;
+    gap: 6px;
+    padding: 5px 12px;
+    background: #f0f0f0;
     border: 1px solid #ddd;
-    border-radius: 5px;
-    margin-bottom: 15px;
-    flex-wrap: wrap;
-}
-
-.input-section label {
-    font-size: 14px;
-    font-weight: bold;
-}
-
-.input-section input {
-    flex: 1;
-    min-width: 200px;
-    padding: 8px;
-    border: 1px solid #999;
-    border-radius: 4px;
-    font-size: 14px;
-}
-
-.input-section .hint {
-    color: #666;
+    border-radius: 15px;
     font-size: 12px;
-    flex-basis: 100%;
+    color: #666;
 }
 
-.btn-insert {
-    padding: 8px 20px;
-    background: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 4px;
+.remove-kill {
     cursor: pointer;
-    font-size: 14px;
     font-weight: bold;
 }
 
-.btn-insert:hover {
-    background: #45a049;
+.remove-kill:hover {
+    color: #333;
 }
 
-.result-area {
-    margin-bottom: 15px;
-}
-
-#resultText {
-    width: 100%;
-    height: 120px;
-    padding: 10px;
-    border: 2px solid #999;
-    border-radius: 3px;
-    font-size: 14px;
-    resize: vertical;
-}
-
-.action-buttons {
-    display: flex;
-    gap: 5px;
-    margin-bottom: 10px;
-    flex-wrap: wrap;
-    align-items: center;
-}
-
-.action-buttons select {
-    padding: 8px 15px;
-    font-size: 13px;
-    border: 1px solid #999;
-    border-radius: 4px;
-    background: white;
-    cursor: pointer;
-}
-
-/* 拖式选择对话框 */
+/* ========== 拖式对话框 ========== */
 .drag-dialog {
     position: fixed;
     top: 0;
@@ -189,297 +452,229 @@ body {
     padding: 30px;
     border-radius: 10px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    min-width: 300px;
+    text-align: center;
+    min-width: 280px;
+}
+
+.drag-dialog-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.drag-dialog-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
 }
 
 .drag-btn {
     padding: 12px 30px;
-    font-size: 16px;
-    font-weight: bold;
     border: none;
     border-radius: 5px;
+    font-size: 15px;
+    font-weight: bold;
     cursor: pointer;
     transition: all 0.2s;
 }
 
 .drag-btn-ball {
-    background: #ff6b6b;
+    background: #6c757d;
     color: white;
 }
 
 .drag-btn-ball:hover {
-    background: #ff5252;
+    background: #5a6268;
     transform: translateY(-2px);
 }
 
 .drag-btn-code {
-    background: #4ecdc4;
+    background: #6c757d;
     color: white;
 }
 
 .drag-btn-code:hover {
-    background: #45b7af;
+    background: #5a6268;
     transform: translateY(-2px);
 }
 
-.action-btn {
-    padding: 8px 15px;
-    border: 1px solid #666;
-    background: #e8e8e8;
+/* 拖式类型选择对话框（新版） */
+.drag-type-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.drag-type-dialog {
+    background: white;
+    border-radius: 10px;
+    padding: 25px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    min-width: 280px;
+}
+
+.drag-type-dialog h3 {
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 18px;
+}
+
+.drag-type-dialog p {
+    margin-bottom: 20px;
+    color: #666;
+    font-size: 14px;
+}
+
+.drag-type-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+.drag-type-btn {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 5px;
+    font-size: 15px;
+    font-weight: bold;
     cursor: pointer;
-    font-size: 13px;
-    border-radius: 3px;
     transition: all 0.2s;
 }
 
-.action-btn:hover {
+.drag-type-btn.banker-btn {
+    background: #6c757d;
+    color: white;
+}
+
+.drag-type-btn.banker-btn:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.drag-type-btn.leg-btn {
+    background: #6c757d;
+    color: white;
+}
+
+.drag-type-btn.leg-btn:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.drag-type-cancel {
+    background: #e8e8e8;
+    border: 1px solid #999;
+    color: #666;
+    padding: 8px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.drag-type-cancel:hover {
     background: #d0d0d0;
 }
 
-.btn-highlight {
-    background: #ffd700;
-    border-color: #ccaa00;
-}
-
-.statistics {
-    margin-top: 15px;
-    padding: 15px;
-    background: #fafafa;
-    border: 2px solid #999;
-    border-radius: 3px;
-    min-height: 150px;
-}
-
-#statsOutput {
-    font-size: 13px;
-    line-height: 1.8;
-    white-space: pre-wrap;
-}
-
+/* ========== 响应式设计 ========== */
 @media (max-width: 768px) {
-    /* 手机端 */
     body {
         padding: 5px;
     }
-    
-    .container {
+
+    .app-container {
         padding: 10px;
     }
-    
-    h2 {
-        font-size: 18px !important;
-        margin-bottom: 15px !important;
-    }
-    
-    .button-row {
-        gap: 5px;
-    }
-    
-    .btn {
-        padding: 8px 10px;
-        font-size: 12px;
-        min-width: 45px;
-    }
-    
-    .input-section {
-        justify-content: center;
-        padding: 10px;
-        gap: 5px;
-    }
-    
-    .input-section input {
-        width: 60px;
-        padding: 6px;
-        font-size: 12px;
-    }
-    
-    .input-section label {
-        font-size: 12px;
-    }
-    
-    .btn-insert {
-        padding: 6px 15px;
-        font-size: 12px;
-    }
-    
-    .action-buttons {
+
+    .result-header {
         flex-direction: column;
-        gap: 10px;
-        align-items: stretch;
+        align-items: flex-start;
     }
-    
-    .action-buttons > div {
+
+    .header-left-group,
+    .header-right-group {
         width: 100%;
-        margin-left: 0 !important;
+        justify-content: space-between;
+    }
+
+    .operation-row {
+        flex-direction: column;
+    }
+
+    .input-wrapper {
+        width: 100%;
+    }
+
+    .op-btn {
+        width: 100%;
         justify-content: center;
     }
-    
-    .action-buttons select {
-        width: 100%;
-        padding: 10px;
-        font-size: 14px;
+
+    .filter-group {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
     }
-    
-    .action-btn {
-        flex: 1;
-        padding: 10px;
-        font-size: 14px;
+
+    .filter-label {
+        min-width: auto;
     }
-    
-    .category-section {
-        padding: 10px;
-        margin-bottom: 15px;
-    }
-    
-    .category-title {
-        font-size: 14px;
-    }
-    
-    .statistics {
-        padding: 10px;
-        min-height: 100px;
-    }
-    
-    #statsOutput {
+
+    .filter-btn {
+        padding: 6px 10px;
         font-size: 12px;
-        line-height: 1.6;
+        min-width: 38px;
     }
-    
-    .drag-dialog-content {
-        padding: 20px;
-        min-width: 280px;
-        max-width: 90%;
+
+    .number-grid {
+        gap: 5px;
     }
-    
-    .drag-dialog-content p {
-        font-size: 14px !important;
+
+    .number-ball {
+        width: 36px;
+        height: 36px;
     }
-    
-    .drag-btn {
-        padding: 12px 25px;
-        font-size: 14px;
+
+    .number-ball .ball-number {
+        font-size: 13px;
+    }
+
+    .number-ball .ball-zodiac {
+        font-size: 8px;
+    }
+
+    .result-content {
+        font-size: 12px;
+    }
+
+    .drag-dialog-buttons {
+        flex-direction: column;
+    }
+
+    .drag-type-buttons {
+        flex-direction: column;
     }
 }
 
+/* 平板端 */
 @media (min-width: 769px) and (max-width: 1024px) {
-    /* 平板端 */
-    .container {
-        max-width: 900px;
-        padding: 20px;
+    .app-container {
+        max-width: 700px;
     }
-    
-    .btn {
-        padding: 9px 16px;
-        font-size: 13px;
-        min-width: 55px;
-    }
-    
-    .button-row {
-        gap: 6px;
-    }
-    
-    .category-section {
-        padding: 12px;
-    }
-    
-    .action-buttons select {
-        font-size: 14px;
-    }
-    
-    #statsOutput {
-        font-size: 13px;
-    }
-}
 
-@media (min-width: 1025px) {
-    /* 电脑端 */
-    .container {
-        max-width: 1200px;
-    }
-    
-    .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    }
-}
-
-/* 横屏手机优化 */
-@media (max-width: 768px) and (orientation: landscape) {
-    .category-section {
-        margin-bottom: 10px;
-    }
-    
-    .statistics {
-        min-height: 80px;
-    }
-}
-
-/* 超小屏幕（小于375px） */
-@media (max-width: 374px) {
-    .btn {
-        padding: 6px 8px;
-        font-size: 11px;
-        min-width: 40px;
-    }
-    
-    .button-row {
-        gap: 3px;
-    }
-    
-    h2 {
-        font-size: 16px !important;
-    }
-    
-    .drag-dialog-content {
-        padding: 15px;
-        min-width: 260px;
-    }
-    
-    .drag-btn {
-        padding: 10px 20px;
-        font-size: 13px;
-    }
-}
-
-/* 大屏幕优化（超过1440px） */
-@media (min-width: 1441px) {
-    .container {
-        max-width: 1400px;
-    }
-    
-    .btn {
-        padding: 12px 24px;
-        font-size: 15px;
-    }
-    
-    .category-title {
-        font-size: 18px;
-    }
-    
-    #statsOutput {
-        font-size: 14px;
-    }
-}
-
-/* 触摸设备优化 */
-@media (hover: none) and (pointer: coarse) {
-    .btn {
-        padding: 12px 16px;
-        min-height: 44px; /* iOS推荐的最小触摸目标 */
-    }
-    
-    .action-btn {
-        min-height: 44px;
-        padding: 10px 20px;
-    }
-    
-    .btn-insert {
-        min-height: 44px;
-    }
-    
-    .drag-btn {
-        min-height: 50px;
-        padding: 15px 30px;
+    .number-ball {
+        width: 40px;
+        height: 40px;
     }
 }
 
@@ -488,19 +683,17 @@ body {
     body {
         background: white;
     }
-    
-    .action-buttons,
-    .input-section,
-    .drag-dialog {
+
+    .filter-section,
+    .operation-panel,
+    .kill-section,
+    .drag-dialog,
+    .drag-type-modal {
         display: none !important;
     }
-    
-    .container {
+
+    .app-container {
         box-shadow: none;
         max-width: 100%;
-    }
-    
-    .btn {
-        border: 1px solid #000;
     }
 }
