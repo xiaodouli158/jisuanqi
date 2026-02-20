@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>选号盘 - 号码统计计算器</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+
+<body>
+    <div class="app-container">
+        <!-- 顶部统计结果与模式选择区域 -->
+        <div class="result-section top-result">
+            <div class="result-header">
+                <div class="header-left-group">
+                    <div class="mode-selector">
+                        <select id="calcMode" class="mode-select">
+                            <option value="single">单式</option>
+                            <option value="compound2">复式二</option>
+                            <option value="compound3">复式三</option>
+                            <option value="compound4">复式四</option>
+                            <option value="compound5">复式五</option>
+                            <option value="compound6">复式六</option>
+                            <option value="compound7">复式七</option>
+                            <option value="drag2">拖式二</option>
+                            <option value="drag3">拖式三</option>
+                            <option value="drag4">拖式四</option>
+                            <option value="drag5">拖式五</option>
+                            <option value="drag6">拖式六</option>
+                            <option value="drag7">拖式七</option>
+                        </select>
+                    </div>
+                    <h3>📊 统计结果</h3>
+                </div>
+                <div class="header-right-group">
+                    <button class="action-btn-small filter-btn" data-filter="clear">🧹 清空选号</button>
+                    <button class="action-btn-small" id="copyResultBtn">📋 复制结果</button>
+                </div>
+            </div>
+            <div class="result-content" id="resultContent">
+                <span class="placeholder-text">选择号码后自动显示统计结果...</span>
+            </div>
+        </div>
+
+        <!-- 整合选号盘：操作在网格上方 -->
+        <div class="integrated-selector">
+            <div class="operation-panel">
+                <div class="operation-row">
+                    <div class="input-wrapper">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="customInput" class="custom-input"
+                            placeholder="支持识别: 号码(01~10)、生肖(龙蛇)、波色(红)、五行(金)">
+                    </div>
+                    <button class="op-btn op-btn-add" id="addNumbersBtn"><span class="btn-icon">＋</span>添加</button>
+                    <button class="op-btn op-btn-kill" id="killNumbersBtn"><span class="btn-icon">🚫</span>杀号</button>
+                </div>
+            </div>
+
+            <div class="number-grid-container">
+                <div class="number-grid" id="numberGrid">
+                    <!-- 动态生成49个号码球 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 筛选区域 (放置在网格下方) - 重新排序 -->
+        <!-- 1. 两面 -->
+        <div class="filter-section">
+            <div class="filter-group">
+                <span class="filter-label">两面</span>
+                <div class="filter-buttons">
+                    <button class="filter-btn" data-filter="big">大号</button>
+                    <button class="filter-btn" data-filter="small">小号</button>
+                    <button class="filter-btn" data-filter="odd">单数</button>
+                    <button class="filter-btn" data-filter="even">双数</button>
+                    <button class="filter-btn" data-filter="wild">野兽</button>
+                    <button class="filter-btn" data-filter="domestic">家畜</button>
+                    <button class="filter-btn" data-filter="tailBig">尾大</button>
+                    <button class="filter-btn" data-filter="tailSmall">尾小</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. 波色 -->
+        <div class="filter-section">
+            <div class="filter-group">
+                <span class="filter-label">波色</span>
+                <div class="filter-buttons">
+                    <button class="filter-btn filter-red" data-filter="red">红波</button>
+                    <button class="filter-btn filter-blue" data-filter="blue">蓝波</button>
+                    <button class="filter-btn filter-green" data-filter="green">绿波</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. 五行 -->
+        <div class="filter-section">
+            <div class="filter-group">
+                <span class="filter-label">五行</span>
+                <div class="filter-buttons">
+                    <button class="filter-btn" data-filter="gold">金</button>
+                    <button class="filter-btn" data-filter="wood">木</button>
+                    <button class="filter-btn" data-filter="water">水</button>
+                    <button class="filter-btn" data-filter="fire">火</button>
+                    <button class="filter-btn" data-filter="earth">土</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. 头数 -->
+        <div class="filter-section">
+            <div class="filter-group">
+                <span class="filter-label">头数</span>
+                <div class="filter-buttons">
+                    <button class="filter-btn" data-filter="head0">0头</button>
+                    <button class="filter-btn" data-filter="head1">1头</button>
+                    <button class="filter-btn" data-filter="head2">2头</button>
+                    <button class="filter-btn" data-filter="head3">3头</button>
+                    <button class="filter-btn" data-filter="head4">4头</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. 尾数 -->
+        <div class="filter-section">
+            <div class="filter-group">
+                <span class="filter-label">尾数</span>
+                <div class="filter-buttons">
+                    <button class="filter-btn" data-filter="tail0">0尾</button>
+                    <button class="filter-btn" data-filter="tail1">1尾</button>
+                    <button class="filter-btn" data-filter="tail2">2尾</button>
+                    <button class="filter-btn" data-filter="tail3">3尾</button>
+                    <button class="filter-btn" data-filter="tail4">4尾</button>
+                    <button class="filter-btn" data-filter="tail5">5尾</button>
+                    <button class="filter-btn" data-filter="tail6">6尾</button>
+                    <button class="filter-btn" data-filter="tail7">7尾</button>
+                    <button class="filter-btn" data-filter="tail8">8尾</button>
+                    <button class="filter-btn" data-filter="tail9">9尾</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. 生肖（动态生成） -->
+        <div class="filter-section">
+            <div class="filter-group">
+                <span class="filter-label">生肖</span>
+                <div class="filter-buttons" id="zodiacButtons">
+                    <!-- 由 JavaScript 根据当前农历年自动生成 -->
+                </div>
+            </div>
+        </div>
+
+
+        <!-- 拖式选择对话框 -->
+        <div id="dragDialog" class="drag-dialog" style="display: none;">
+            <div class="drag-dialog-content">
+                <p class="drag-dialog-title">请选择号码类型:</p>
+                <div class="drag-dialog-buttons">
+                    <button class="drag-btn drag-btn-ball" onclick="selectDragType('ball')">🎯 拖胆</button>
+                    <button class="drag-btn drag-btn-code" onclick="selectDragType('code')">📦 拖码</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
