@@ -1320,9 +1320,12 @@ function getDetailedStatistics(numbers) {
     let tailBigCount = 0, tailSmallCount = 0;
     let wildCount = 0, domesticCount = 0;
     const elementStats = { '金': 0, '木': 0, '水': 0, '火': 0, '土': 0 };
+    const zodiacOrder = filterCategories['zodiac'];
     const zodiacStats = {};
 
-    for (const z in numberData.zodiac) zodiacStats[z] = 0;
+    zodiacOrder.forEach(z => {
+        zodiacStats[z] = 0;
+    });
 
     numbers.forEach(n => {
         if (waveRedSet.has(n)) redCount++;
@@ -1349,7 +1352,7 @@ function getDetailedStatistics(numbers) {
     info += `  家野: 野肖${wildCount} 家肖${domesticCount}\n`;
     info += `  五行: 金${elementStats['金']} 木${elementStats['木']} 水${elementStats['水']} 火${elementStats['火']} 土${elementStats['土']}\n`;
 
-    const zodiacList = Object.entries(zodiacStats).map(([z, c]) => `${z}${c}`);
+    const zodiacList = zodiacOrder.map(z => `${z}${zodiacStats[z]}`);
     info += `  生肖: ${zodiacList.join(' ')}\n`;
 
     return info;
