@@ -35,7 +35,7 @@
                     <h3>📊 统计结果</h3>
                 </div>
                 <div class="header-right-group">
-                    <button class="action-btn-small filter-btn" data-filter="clear">🧹 清空选号</button>
+                    <button class="action-btn-small" id="clearAllBtn" type="button">清空选号</button>
                     <button class="action-btn-small" id="copyResultBtn">📋 复制结果</button>
                 </div>
             </div>
@@ -48,13 +48,14 @@
         <div class="integrated-selector">
             <div class="operation-panel">
                 <div class="operation-row">
+                    <button class="op-btn op-btn-reverse" id="invertNumbersBtn" type="button">反选</button>
+                    <button class="op-btn op-btn-kill" id="killNumbersBtn" type="button">杀号</button>
                     <div class="input-wrapper">
                         <span class="search-icon">🔍</span>
                         <input type="text" id="customInput" class="custom-input"
-                            placeholder="支持识别: 号码(01~10)、生肖(龙蛇)、波色(红)、五行(金)">
+                            placeholder="支持识别: 号码(01~10)、生肖(龙蛇)、两面(野肖/家肖)、波色(红波)、五行(金)">
                     </div>
-                    <button class="op-btn op-btn-add" id="addNumbersBtn"><span class="btn-icon">＋</span>添加</button>
-                    <button class="op-btn op-btn-kill" id="killNumbersBtn"><span class="btn-icon">🚫</span>杀号</button>
+                    <button class="op-btn op-btn-add" id="addNumbersBtn" type="button"><span class="btn-icon">＋</span>添加</button>
                 </div>
             </div>
 
@@ -70,15 +71,19 @@
         <div class="filter-section">
             <div class="filter-group">
                 <span class="filter-label">两面</span>
-                <div class="filter-buttons">
-                    <button class="filter-btn" data-filter="big">大号</button>
-                    <button class="filter-btn" data-filter="small">小号</button>
-                    <button class="filter-btn" data-filter="odd">单数</button>
-                    <button class="filter-btn" data-filter="even">双数</button>
-                    <button class="filter-btn" data-filter="wild">野兽</button>
-                    <button class="filter-btn" data-filter="domestic">家畜</button>
-                    <button class="filter-btn" data-filter="tailBig">尾大</button>
-                    <button class="filter-btn" data-filter="tailSmall">尾小</button>
+                <div class="filter-body">
+                    <div class="filter-buttons">
+                        <button class="filter-btn" data-filter="big">大号</button>
+                        <button class="filter-btn" data-filter="small">小号</button>
+                        <button class="filter-btn" data-filter="odd">单数</button>
+                        <button class="filter-btn" data-filter="even">双数</button>
+                        <button class="filter-btn" data-filter="tailBig">尾大</button>
+                        <button class="filter-btn" data-filter="tailSmall">尾小</button>
+                        <button class="filter-btn" data-filter="wild">野肖</button>
+                        <button class="filter-btn" data-filter="domestic">家肖</button>
+                    </div>
+                    <div class="filter-buttons filter-buttons-advanced" id="twoSideAdvancedButtons">
+                    </div>
                 </div>
             </div>
         </div>
@@ -87,10 +92,13 @@
         <div class="filter-section">
             <div class="filter-group">
                 <span class="filter-label">波色</span>
-                <div class="filter-buttons">
-                    <button class="filter-btn filter-red" data-filter="red">红波</button>
-                    <button class="filter-btn filter-blue" data-filter="blue">蓝波</button>
-                    <button class="filter-btn filter-green" data-filter="green">绿波</button>
+                <div class="filter-body">
+                    <div class="filter-buttons">
+                        <button class="filter-btn filter-red" data-filter="red">红波</button>
+                        <button class="filter-btn filter-blue" data-filter="blue">蓝波</button>
+                        <button class="filter-btn filter-green" data-filter="green">绿波</button>
+                    </div>
+                    <div class="filter-buttons filter-buttons-advanced" id="waveAdvancedButtons"></div>
                 </div>
             </div>
         </div>
@@ -148,18 +156,6 @@
                 <span class="filter-label">生肖</span>
                 <div class="filter-buttons" id="zodiacButtons">
                     <!-- 由 JavaScript 根据当前农历年自动生成 -->
-                </div>
-            </div>
-        </div>
-
-
-        <!-- 拖式选择对话框 -->
-        <div id="dragDialog" class="drag-dialog" style="display: none;">
-            <div class="drag-dialog-content">
-                <p class="drag-dialog-title">请选择号码类型:</p>
-                <div class="drag-dialog-buttons">
-                    <button class="drag-btn drag-btn-ball" onclick="selectDragType('ball')">🎯 拖胆</button>
-                    <button class="drag-btn drag-btn-code" onclick="selectDragType('code')">📦 拖码</button>
                 </div>
             </div>
         </div>

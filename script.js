@@ -12,7 +12,7 @@ const ZODIAC_ELEMENT = {
     '牛': '土', '龙': '土', '羊': '土', '狗': '土'
 };
 
-// 野兽和家畜分类（固定不变）
+// 野肖和家肖分类（固定不变）
 const WILD_ZODIACS = new Set(['鼠', '虎', '兔', '龙', '蛇', '猴']);
 const DOMESTIC_ZODIACS = new Set(['牛', '马', '羊', '鸡', '狗', '猪']);
 
@@ -250,7 +250,7 @@ function generateNumberMappings(currentZodiac, lunarYear) {
         elementMap[el] = BASE_ELEMENT[el].map(n => shiftNumber(n, shift)).sort((a, b) => a - b);
     }
 
-    // 构建野兽/家畜→号码映射
+    // 构建野肖/家肖→号码映射
     const wildNumbers = [];
     const domesticNumbers = [];
     for (const zodiac in zodiacMap) {
@@ -266,7 +266,7 @@ function generateNumberMappings(currentZodiac, lunarYear) {
     return {
         zodiac: zodiacMap,
         element: elementMap,
-        beast: { '野兽': wildNumbers, '家畜': domesticNumbers },
+        beast: { '野肖': wildNumbers, '家肖': domesticNumbers },
         currentZodiac: currentZodiac
     };
 }
@@ -284,7 +284,7 @@ const numberData = {
     // 生肖（根据当前农历年自动计算）
     zodiac: dynamicMappings.zodiac,
 
-    // 野兽和家畜（根据生肖自动计算）
+    // 野肖和家肖（根据生肖自动计算）
     beast: dynamicMappings.beast,
 
     // 五行（根据生肖五行属性自动计算）
@@ -343,9 +343,12 @@ const numberData = {
 const numberToZodiac = {};
 const numberToWave = {};
 const numberToElement = {};
+const ALL_NUMBERS = Object.freeze([...numberData.numbers]);
 const waveRedSet = new Set(numberData.wave.red);
 const waveBlueSet = new Set(numberData.wave.blue);
 const waveGreenSet = new Set(numberData.wave.green);
+const tailBigSet = new Set(numberData.tailSize.big);
+const wildSet = new Set(numberData.beast['野肖']);
 
 // 初始化映射
 (function initMappings() {
@@ -369,8 +372,8 @@ const filterMap = {
     'small': numberData.size.small,
     'odd': numberData.parity.odd,
     'even': numberData.parity.even,
-    'wild': numberData.beast['野兽'],
-    'domestic': numberData.beast['家畜'],
+    'wild': numberData.beast['野肖'],
+    'domestic': numberData.beast['家肖'],
     'tailBig': numberData.tailSize.big,
     'tailSmall': numberData.tailSize.small,
     'head0': numberData.head[0],
@@ -395,12 +398,70 @@ const filterMap = {
     'earth': numberData.element['土']
 };
 
+function buildIntersectionNumbers(filterKeys) {
+    const groups = filterKeys
+        .map(key => filterMap[key])
+        .filter(numbers => Array.isArray(numbers) && numbers.length > 0)
+        .map(numbers => new Set(numbers));
+
+    if (groups.length === 0) return [];
+    return ALL_NUMBERS.filter(num => groups.every(set => set.has(num)));
+}
+
+const TWO_SIDE_ADVANCED_FILTERS = [
+    { key: 'wildBig', label: '野大', filterKeys: ['wild', 'big'] },
+    { key: 'wildSmall', label: '野小', filterKeys: ['wild', 'small'] },
+    { key: 'wildOdd', label: '野单', filterKeys: ['wild', 'odd'] },
+    { key: 'wildEven', label: '野双', filterKeys: ['wild', 'even'] },
+    { key: 'domesticBig', label: '家大', filterKeys: ['domestic', 'big'] },
+    { key: 'domesticSmall', label: '家小', filterKeys: ['domestic', 'small'] },
+    { key: 'domesticOdd', label: '家单', filterKeys: ['domestic', 'odd'] },
+    { key: 'domesticEven', label: '家双', filterKeys: ['domestic', 'even'] }
+];
+
+const WAVE_ADVANCED_FILTERS = [
+    { key: 'redBig', label: '红大', filterKeys: ['red', 'big'] },
+    { key: 'redSmall', label: '红小', filterKeys: ['red', 'small'] },
+    { key: 'redOdd', label: '红单', filterKeys: ['red', 'odd'] },
+    { key: 'redEven', label: '红双', filterKeys: ['red', 'even'] },
+    { key: 'blueBig', label: '蓝大', filterKeys: ['blue', 'big'] },
+    { key: 'blueSmall', label: '蓝小', filterKeys: ['blue', 'small'] },
+    { key: 'blueOdd', label: '蓝单', filterKeys: ['blue', 'odd'] },
+    { key: 'blueEven', label: '蓝双', filterKeys: ['blue', 'even'] },
+    { key: 'greenBig', label: '绿大', filterKeys: ['green', 'big'] },
+    { key: 'greenSmall', label: '绿小', filterKeys: ['green', 'small'] },
+    { key: 'greenOdd', label: '绿单', filterKeys: ['green', 'odd'] },
+    { key: 'greenEven', label: '绿双', filterKeys: ['green', 'even'] }
+];
+
+[...TWO_SIDE_ADVANCED_FILTERS, ...WAVE_ADVANCED_FILTERS].forEach(({ key, filterKeys }) => {
+    filterMap[key] = buildIntersectionNumbers(filterKeys);
+});
+
+const FILTER_KEYWORD_CONFIGS = [
+    { filter: 'big', keywords: ['大号'] },
+    { filter: 'small', keywords: ['小号'] },
+    { filter: 'odd', keywords: ['单数'] },
+    { filter: 'even', keywords: ['双数'] },
+    { filter: 'tailBig', keywords: ['尾大'] },
+    { filter: 'tailSmall', keywords: ['尾小'] },
+    { filter: 'wild', keywords: ['野肖', '野兽'] },
+    { filter: 'domestic', keywords: ['家肖', '家畜'] },
+    { filter: 'red', keywords: ['红', '红波'] },
+    { filter: 'blue', keywords: ['蓝', '蓝波'] },
+    { filter: 'green', keywords: ['绿', '绿波'] },
+    ...TWO_SIDE_ADVANCED_FILTERS.map(({ key, label }) => ({ filter: key, keywords: [label] })),
+    ...WAVE_ADVANCED_FILTERS.map(({ key, label }) => ({ filter: key, keywords: [label] }))
+];
+
 const filterCategories = {
     'bigSmall': ['big', 'small'],
     'oddEven': ['odd', 'even'],
     'wildDomestic': ['wild', 'domestic'],
     'tailBigSmall': ['tailBig', 'tailSmall'],
+    'twoSideCombo': TWO_SIDE_ADVANCED_FILTERS.map(({ key }) => key),
     'wave': ['red', 'blue', 'green'],
+    'waveCombo': WAVE_ADVANCED_FILTERS.map(({ key }) => key),
     'element': ['gold', 'wood', 'water', 'fire', 'earth'],
     'head': ['head0', 'head1', 'head2', 'head3', 'head4'],
     'tail': ['tail0', 'tail1', 'tail2', 'tail3', 'tail4', 'tail5', 'tail6', 'tail7', 'tail8', 'tail9'],
@@ -418,9 +479,11 @@ const filterCategories = {
 const categoryNames = {
     'bigSmall': '大小',
     'oddEven': '单双',
-    'wildDomestic': '野家',
+    'wildDomestic': '野肖/家肖',
     'tailBigSmall': '尾大小',
+    'twoSideCombo': '两面组合',
     'wave': '波色',
+    'waveCombo': '波色组合',
     'element': '五行',
     'head': '头数',
     'tail': '尾数',
@@ -428,13 +491,27 @@ const categoryNames = {
 };
 
 // ========== 核心状态 ==========
+const PREVIEW_COMBINATION_LIMIT = 100;
+const MAX_COPY_COMBINATIONS = 50000;
+
+function createLastResult(mode = 'single') {
+    return {
+        mode,
+        numbers: [],
+        combinations: [],
+        combinationCount: 0,
+        buildCopyText: null,
+        copyWarning: ''
+    };
+}
+
 const state = {
     conditions: [],
     nextConditionId: 1,
     nextCustomNumberId: 1,    // 选号盘点击 -> 号码x
     nextDefinitionId: 1,      // 输入框输入 -> 定义x
     currentMode: 'single',
-    lastResult: { mode: 'single', numbers: [], combinations: [] }
+    lastResult: createLastResult('single')
 };
 
 // ========== 输入管理器（统一管理输入状态）==========
@@ -561,6 +638,183 @@ function sortNumbers(arr) {
     return [...arr].sort((a, b) => a - b);
 }
 
+function countCombinations(total, pick) {
+    if (pick < 0 || pick > total) return 0;
+    if (pick === 0 || pick === total) return 1;
+
+    let result = 1;
+    const k = Math.min(pick, total - pick);
+    for (let i = 1; i <= k; i++) {
+        result = (result * (total - k + i)) / i;
+    }
+    return Math.round(result);
+}
+
+function iterateCombinations(arr, n, handler) {
+    if (n < 0 || n > arr.length) return true;
+    if (n === 0) return handler([]) !== false;
+
+    const combo = [];
+    let shouldContinue = true;
+
+    function combine(start) {
+        if (!shouldContinue) return;
+
+        if (combo.length === n) {
+            if (handler([...combo]) === false) {
+                shouldContinue = false;
+            }
+            return;
+        }
+
+        const need = n - combo.length;
+        for (let i = start; i <= arr.length - need && shouldContinue; i++) {
+            combo.push(arr[i]);
+            combine(i + 1);
+            combo.pop();
+        }
+    }
+
+    combine(0);
+    return shouldContinue;
+}
+
+function generateCombinationPreview(arr, n, limit = PREVIEW_COMBINATION_LIMIT) {
+    const preview = [];
+    iterateCombinations(arr, n, combo => {
+        preview.push(combo);
+        return preview.length < limit;
+    });
+    return preview;
+}
+
+function buildCombinationCopyText(arr, n, totalCount) {
+    if (totalCount > MAX_COPY_COMBINATIONS) return null;
+
+    const lines = [];
+    iterateCombinations(arr, n, combo => {
+        lines.push(formatNumbers(combo));
+    });
+    return lines.join('\n');
+}
+
+function buildDragContext(filteredBankerArr, filteredLegArr) {
+    const bankerSet = new Set(filteredBankerArr);
+    const legSet = new Set(filteredLegArr);
+
+    return {
+        pureBankers: filteredBankerArr.filter(num => !legSet.has(num)),
+        overlap: filteredBankerArr.filter(num => legSet.has(num)),
+        pureLegs: filteredLegArr.filter(num => !bankerSet.has(num))
+    };
+}
+
+function getDragSelectionPatterns(dragContext, n) {
+    const patterns = [];
+    const { pureBankers, overlap, pureLegs } = dragContext;
+
+    for (let p = 0; p <= Math.min(1, pureBankers.length, n); p++) {
+        for (let o = 0; o <= Math.min(overlap.length, n - p); o++) {
+            const l = n - p - o;
+            if (l < 0 || l > pureLegs.length) continue;
+            if (p + o === 0) continue;
+            if (o + l === 0) continue;
+            patterns.push({ p, o, l });
+        }
+    }
+
+    return patterns;
+}
+
+function countDragCombinations(dragContext, n) {
+    return getDragSelectionPatterns(dragContext, n).reduce((total, { p, o, l }) => {
+        return total + (
+            countCombinations(dragContext.pureBankers.length, p)
+            * countCombinations(dragContext.overlap.length, o)
+            * countCombinations(dragContext.pureLegs.length, l)
+        );
+    }, 0);
+}
+
+function iterateDragCombinations(dragContext, n, handler, limit = Infinity) {
+    const { pureBankers, overlap, pureLegs } = dragContext;
+    const allNumbers = sortNumbers([...new Set([...pureBankers, ...overlap, ...pureLegs])]);
+    const pureBankerSet = new Set(pureBankers);
+    const overlapSet = new Set(overlap);
+    const pureLegSet = new Set(pureLegs);
+    const suffixBanker = new Array(allNumbers.length + 1).fill(0);
+    const suffixLeg = new Array(allNumbers.length + 1).fill(0);
+    const combo = [];
+    let generated = 0;
+    let shouldContinue = true;
+
+    for (let i = allNumbers.length - 1; i >= 0; i--) {
+        const num = allNumbers[i];
+        const isBanker = pureBankerSet.has(num) || overlapSet.has(num);
+        const isLeg = overlapSet.has(num) || pureLegSet.has(num);
+        suffixBanker[i] = suffixBanker[i + 1] + (isBanker ? 1 : 0);
+        suffixLeg[i] = suffixLeg[i + 1] + (isLeg ? 1 : 0);
+    }
+
+    function combine(start, pureBankerCount, bankerCount, legCount) {
+        if (!shouldContinue) return;
+        if (pureBankerCount > 1) return;
+
+        if (combo.length === n) {
+            if (bankerCount > 0 && legCount > 0) {
+                generated++;
+                if (handler([...combo], generated) === false || generated >= limit) {
+                    shouldContinue = false;
+                }
+            }
+            return;
+        }
+
+        const need = n - combo.length;
+        if (allNumbers.length - start < need) return;
+        if (bankerCount === 0 && suffixBanker[start] === 0) return;
+        if (legCount === 0 && suffixLeg[start] === 0) return;
+
+        for (let i = start; i <= allNumbers.length - need && shouldContinue; i++) {
+            const num = allNumbers[i];
+            const isPureBanker = pureBankerSet.has(num);
+            const isOverlap = overlapSet.has(num);
+            const isPureLeg = pureLegSet.has(num);
+
+            combo.push(num);
+            combine(
+                i + 1,
+                pureBankerCount + (isPureBanker ? 1 : 0),
+                bankerCount + ((isPureBanker || isOverlap) ? 1 : 0),
+                legCount + ((isOverlap || isPureLeg) ? 1 : 0)
+            );
+            combo.pop();
+        }
+    }
+
+    combine(0, 0, 0, 0);
+    return generated;
+}
+
+function generateDragCombinationPreview(dragContext, n, limit = PREVIEW_COMBINATION_LIMIT) {
+    const preview = [];
+    iterateDragCombinations(dragContext, n, combo => {
+        preview.push(combo);
+        return preview.length < limit;
+    }, limit);
+    return preview;
+}
+
+function buildDragCopyText(dragContext, n, totalCount) {
+    if (totalCount > MAX_COPY_COMBINATIONS) return null;
+
+    const lines = [];
+    iterateDragCombinations(dragContext, n, combo => {
+        lines.push(formatNumbers(combo));
+    });
+    return lines.join('\n');
+}
+
 function getKilledNumbers(excludeConditions) {
     const killed = new Set();
     excludeConditions.forEach(c => c.numbers.forEach(n => killed.add(n)));
@@ -609,6 +863,7 @@ document.addEventListener('DOMContentLoaded', function () {
     dom.calcMode = document.getElementById('calcMode');
 
     initZodiacButtons();
+    initAdvancedFilterButtons();
     initNumberGrid();
     initFilterButtons();
     initOperationButtons();
@@ -631,6 +886,7 @@ function initZodiacButtons() {
 
     zodiacOrder.forEach(zodiac => {
         const btn = document.createElement('button');
+        btn.type = 'button';
         btn.className = 'filter-btn zodiac-btn';
         btn.dataset.zodiac = zodiac;
         btn.textContent = zodiac;
@@ -640,6 +896,26 @@ function initZodiacButtons() {
             btn.title = `${zodiac}（今年生肖）`;
         }
 
+        container.appendChild(btn);
+    });
+}
+
+function initAdvancedFilterButtons() {
+    renderDerivedFilterButtons('twoSideAdvancedButtons', TWO_SIDE_ADVANCED_FILTERS);
+    renderDerivedFilterButtons('waveAdvancedButtons', WAVE_ADVANCED_FILTERS);
+}
+
+function renderDerivedFilterButtons(containerId, filterDefinitions) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    container.innerHTML = '';
+    filterDefinitions.forEach(({ key, label }) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'filter-btn';
+        btn.dataset.filter = key;
+        btn.textContent = label;
         container.appendChild(btn);
     });
 }
@@ -681,11 +957,8 @@ function initFilterButtons() {
 }
 
 function handleFilterClick(btn) {
-    const filter = btn.dataset.filter;
-
-    if (filter === 'clear') {
-        clearAllConditions();
-        return;
+    if (dom.customInput) {
+        dom.customInput.value = '';
     }
 
     const currentCategory = getButtonCategory(btn);
@@ -738,8 +1011,14 @@ function initOperationButtons() {
     // 添加按钮
     document.getElementById('addNumbersBtn').addEventListener('click', handleAddNumbers);
 
+    // 反选按钮
+    document.getElementById('invertNumbersBtn').addEventListener('click', handleInvertNumbers);
+
     // 杀号按钮
     document.getElementById('killNumbersBtn').addEventListener('click', handleKillNumbers);
+
+    // 清空按钮
+    document.getElementById('clearAllBtn').addEventListener('click', clearAllConditions);
 
     // 复制结果
     document.getElementById('copyResultBtn').addEventListener('click', handleCopyResult);
@@ -748,6 +1027,21 @@ function initOperationButtons() {
     dom.customInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') handleAddNumbers();
     });
+}
+
+function handleInvertNumbers() {
+    const input = InputManager.getInput();
+
+    if (!input || input.numbers.length === 0) {
+        alert('请先输入或选择需要反选的号码');
+        return;
+    }
+
+    const selectedSet = new Set(input.numbers);
+    const invertedNumbers = ALL_NUMBERS.filter(num => !selectedSet.has(num));
+
+    InputManager.clear();
+    invertedNumbers.forEach(num => InputManager.addNumber(num));
 }
 
 function handleAddNumbers() {
@@ -780,16 +1074,30 @@ function handleKillNumbers() {
 }
 
 function handleCopyResult() {
-    const { numbers, combinations } = state.lastResult;
+    const { numbers, combinations, combinationCount, buildCopyText, copyWarning } = state.lastResult;
 
-    if (numbers.length === 0 && combinations.length === 0) {
+    if (numbers.length === 0 && combinations.length === 0 && combinationCount === 0) {
         alert('没有可复制的内容');
         return;
     }
 
-    const textToCopy = state.currentMode === 'single'
-        ? formatNumbers(numbers)
-        : combinations.map(formatNumbers).join('\n');
+    if (state.currentMode === 'single') {
+        copyToClipboard(formatNumbers(numbers));
+        return;
+    }
+
+    if (combinationCount === 0) {
+        alert('没有可复制的组合结果');
+        return;
+    }
+
+    let textToCopy = buildCopyText ? buildCopyText() : '';
+    if (!textToCopy) {
+        textToCopy = combinations.map(formatNumbers).join('\n');
+        if (copyWarning) {
+            alert(copyWarning);
+        }
+    }
 
     copyToClipboard(textToCopy);
 }
@@ -951,26 +1259,6 @@ function calculateUnion() {
     return sortNumbers(excludeKilledNumbers(Array.from(unionSet), getKilledNumbers(excludeConditions)));
 }
 
-function generateCombinations(arr, n) {
-    if (n === 1) return arr.map(x => [x]);
-    if (n > arr.length) return [];
-
-    const result = [];
-    function combine(start, combo) {
-        if (combo.length === n) {
-            result.push([...combo]);
-            return;
-        }
-        for (let i = start; i < arr.length; i++) {
-            combo.push(arr[i]);
-            combine(i + 1, combo);
-            combo.pop();
-        }
-    }
-    combine(0, []);
-    return result;
-}
-
 // ========== 显示相关 ==========
 function groupConditionsByCategory(conditionsList) {
     const grouped = {};
@@ -1011,8 +1299,9 @@ function formatConditionsForHTML(conditionsList, prefix = '') {
         const sortedNumbers = mergeConditionNumbers(items);
         const labels = items.map(c => c.label).join('+');
         const conditionIds = items.map(c => c.id);
+        const conditionText = `${prefix}${cat}: ${labels} → ${formatNumbers(sortedNumbers)} (${sortedNumbers.length}个)`;
         html += `<div class="condition-line">`;
-        html += `<span class="condition-text">${prefix}${cat}: ${labels} → ${formatNumbers(sortedNumbers)} (${sortedNumbers.length}个)</span>`;
+        html += `<span class="condition-text">${escapeHTML(conditionText)}</span>`;
         // 为该组的每个条件添加删除按钮
         conditionIds.forEach(id => {
             html += `<button class="condition-remove-btn" onclick="removeCondition(${id})" title="删除此条件">✕</button>`;
@@ -1032,9 +1321,6 @@ function getDetailedStatistics(numbers) {
     let wildCount = 0, domesticCount = 0;
     const elementStats = { '金': 0, '木': 0, '水': 0, '火': 0, '土': 0 };
     const zodiacStats = {};
-
-    const tailBigSet = new Set(numberData.tailSize.big);
-    const wildSet = new Set(numberData.beast['野兽']);
 
     for (const z in numberData.zodiac) zodiacStats[z] = 0;
 
@@ -1060,7 +1346,7 @@ function getDetailedStatistics(numbers) {
     info += `  大小: 大${bigCount} 小${smallCount}\n`;
     info += `  单双: 单${oddCount} 双${evenCount}\n`;
     info += `  尾大小: 尾大${tailBigCount} 尾小${tailSmallCount}\n`;
-    info += `  家野: 野兽${wildCount} 家畜${domesticCount}\n`;
+    info += `  家野: 野肖${wildCount} 家肖${domesticCount}\n`;
     info += `  五行: 金${elementStats['金']} 木${elementStats['木']} 水${elementStats['水']} 火${elementStats['火']} 土${elementStats['土']}\n`;
 
     const zodiacList = Object.entries(zodiacStats).map(([z, c]) => `${z}${c}`);
@@ -1078,7 +1364,7 @@ function updateResultDisplay() {
             ? '拖式模式：请先添加拖胆号码，再添加拖码号码...'
             : '添加选号条件后自动显示统计结果...';
         resultContent.innerHTML = `<span class="placeholder-text">${placeholder}</span>`;
-        state.lastResult = { mode: state.currentMode, numbers: [], combinations: [] };
+        state.lastResult = createLastResult(state.currentMode);
         return;
     }
 
@@ -1137,7 +1423,10 @@ function renderSingleMode() {
         html += '</div>';
     }
 
-    state.lastResult = { mode: state.currentMode, numbers: intersectionNumbers, combinations: [] };
+    state.lastResult = {
+        ...createLastResult(state.currentMode),
+        numbers: intersectionNumbers
+    };
 
     // 分类统计
     if (intersectionNumbers.length > 0) {
@@ -1166,20 +1455,33 @@ function renderCompoundMode() {
     // 结果部分用纯文本
     let resultText = '';
     if (unionNumbers.length >= n) {
-        const combinations = generateCombinations(unionNumbers, n);
-        state.lastResult = { mode: state.currentMode, numbers: unionNumbers, combinations };
+        const combinationCount = countCombinations(unionNumbers.length, n);
+        const previewCombinations = generateCombinationPreview(unionNumbers, n);
+        state.lastResult = {
+            ...createLastResult(state.currentMode),
+            numbers: unionNumbers,
+            combinations: previewCombinations,
+            combinationCount,
+            buildCopyText: () => buildCombinationCopyText(unionNumbers, n, combinationCount),
+            copyWarning: combinationCount > MAX_COPY_COMBINATIONS
+                ? `结果共${combinationCount}注，数量过大，为保证稳定仅复制前${previewCombinations.length}注预览。`
+                : ''
+        };
 
         resultText += `\n统计结果（复式${n}）：\n`;
-        resultText += `共${combinations.length}注\n\n`;
+        resultText += `共${combinationCount}注\n\n`;
 
-        combinations.slice(0, 100).forEach(combo => {
+        previewCombinations.forEach(combo => {
             resultText += `${formatNumbers(combo)}\n`;
         });
-        if (combinations.length > 100) {
-            resultText += `\n...(还有${combinations.length - 100}注)\n`;
+        if (combinationCount > PREVIEW_COMBINATION_LIMIT) {
+            resultText += `\n...(仅显示前${PREVIEW_COMBINATION_LIMIT}注，剩余${combinationCount - PREVIEW_COMBINATION_LIMIT}注)\n`;
         }
     } else {
-        state.lastResult = { mode: state.currentMode, numbers: unionNumbers, combinations: [] };
+        state.lastResult = {
+            ...createLastResult(state.currentMode),
+            numbers: unionNumbers
+        };
         resultText += `\n统计结果（复式${n}）：\n`;
         resultText += `号码不足${n}个，无法生成组合\n`;
     }
@@ -1241,40 +1543,42 @@ function renderDragMode() {
     // 组合结果部分用纯文本
     let resultText = '';
     if (filteredBankerArr.length > 0 && filteredLegArr.length > 0) {
-        const bankerSet = new Set(filteredBankerArr);
-        const legSet = new Set(filteredLegArr);
-        const pureBankers = filteredBankerArr.filter(num => !legSet.has(num));
-        const pureBankerSet = new Set(pureBankers);
+        const dragContext = buildDragContext(filteredBankerArr, filteredLegArr);
+        const combinationCount = countDragCombinations(dragContext, n);
+        const previewCombinations = generateDragCombinationPreview(dragContext, n);
+        const resultNumbers = sortNumbers([...new Set([...filteredBankerArr, ...filteredLegArr])]);
 
-        const allNumbers = sortNumbers([...new Set([...filteredBankerArr, ...filteredLegArr])]);
-        const allPossibleCombos = generateCombinations(allNumbers, n);
+        if (combinationCount > 0) {
+            state.lastResult = {
+                ...createLastResult(state.currentMode),
+                numbers: resultNumbers,
+                combinations: previewCombinations,
+                combinationCount,
+                buildCopyText: () => buildDragCopyText(dragContext, n, combinationCount),
+                copyWarning: combinationCount > MAX_COPY_COMBINATIONS
+                    ? `结果共${combinationCount}注，数量过大，为保证稳定仅复制前${previewCombinations.length}注预览。`
+                    : ''
+            };
 
-        const allCombinations = allPossibleCombos.filter(combo => {
-            const hasBanker = combo.some(num => bankerSet.has(num));
-            const hasLeg = combo.some(num => legSet.has(num));
-            const pureBankerCount = combo.filter(num => pureBankerSet.has(num)).length;
-            return hasBanker && hasLeg && pureBankerCount <= 1;
-        });
+            resultText += `\n共${combinationCount}注\n\n`;
 
-        state.lastResult = {
-            mode: state.currentMode,
-            numbers: [...filteredBankerArr, ...filteredLegArr],
-            combinations: allCombinations
-        };
-
-        resultText += `\n共${allCombinations.length}注\n\n`;
-
-        allCombinations.slice(0, 100).forEach(combo => {
-            resultText += `${formatNumbers(combo)}\n`;
-        });
-        if (allCombinations.length > 100) {
-            resultText += `\n...(还有${allCombinations.length - 100}注)\n`;
+            previewCombinations.forEach(combo => {
+                resultText += `${formatNumbers(combo)}\n`;
+            });
+            if (combinationCount > PREVIEW_COMBINATION_LIMIT) {
+                resultText += `\n...(仅显示前${PREVIEW_COMBINATION_LIMIT}注，剩余${combinationCount - PREVIEW_COMBINATION_LIMIT}注)\n`;
+            }
+        } else {
+            state.lastResult = {
+                ...createLastResult(state.currentMode),
+                numbers: resultNumbers
+            };
+            resultText += `\n号码不足，无法生成${n}个号码的组合\n`;
         }
     } else {
         state.lastResult = {
-            mode: state.currentMode,
-            numbers: [...filteredBankerArr, ...filteredLegArr],
-            combinations: []
+            ...createLastResult(state.currentMode),
+            numbers: sortNumbers([...new Set([...filteredBankerArr, ...filteredLegArr])])
         };
 
         if (filteredBankerArr.length === 0 && bankerArr.length > 0) {
@@ -1314,6 +1618,13 @@ function parseNumberInput(input) {
         }
     }
 
+    const tokenSet = new Set(
+        input
+            .split(/[\s,，、;；|/]+/)
+            .map(part => part.trim())
+            .filter(Boolean)
+    );
+
     // 2. 处理关键字
     for (const zodiac in numberData.zodiac) {
         if (input.includes(zodiac)) {
@@ -1321,9 +1632,11 @@ function parseNumberInput(input) {
         }
     }
 
-    if (input.includes('红')) numberData.wave.red.forEach(n => numbers.add(n));
-    if (input.includes('蓝')) numberData.wave.blue.forEach(n => numbers.add(n));
-    if (input.includes('绿')) numberData.wave.green.forEach(n => numbers.add(n));
+    FILTER_KEYWORD_CONFIGS.forEach(({ filter, keywords }) => {
+        if (keywords.some(keyword => tokenSet.has(keyword))) {
+            (filterMap[filter] || []).forEach(n => numbers.add(n));
+        }
+    });
 
     for (const element in numberData.element) {
         if (input.includes(element)) {
