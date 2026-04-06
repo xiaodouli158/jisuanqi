@@ -336,6 +336,17 @@ const numberData = {
         7: [7, 17, 27, 37, 47],
         8: [8, 18, 28, 38, 48],
         9: [9, 19, 29, 39, 49]
+    },
+
+    // 七段（每7个号码一段，共7段）
+    segment: {
+        1: [1, 2, 3, 4, 5, 6, 7],
+        2: [8, 9, 10, 11, 12, 13, 14],
+        3: [15, 16, 17, 18, 19, 20, 21],
+        4: [22, 23, 24, 25, 26, 27, 28],
+        5: [29, 30, 31, 32, 33, 34, 35],
+        6: [36, 37, 38, 39, 40, 41, 42],
+        7: [43, 44, 45, 46, 47, 48, 49]
     }
 };
 
@@ -395,7 +406,14 @@ const filterMap = {
     'wood': numberData.element['木'],
     'water': numberData.element['水'],
     'fire': numberData.element['火'],
-    'earth': numberData.element['土']
+    'earth': numberData.element['土'],
+    'seg1': numberData.segment[1],
+    'seg2': numberData.segment[2],
+    'seg3': numberData.segment[3],
+    'seg4': numberData.segment[4],
+    'seg5': numberData.segment[5],
+    'seg6': numberData.segment[6],
+    'seg7': numberData.segment[7]
 };
 
 function buildIntersectionNumbers(filterKeys) {
@@ -464,6 +482,7 @@ const filterCategories = {
     'waveCombo': WAVE_ADVANCED_FILTERS.map(({ key }) => key),
     'element': ['gold', 'wood', 'water', 'fire', 'earth'],
     'head': ['head0', 'head1', 'head2', 'head3', 'head4'],
+    'segment': ['seg1', 'seg2', 'seg3', 'seg4', 'seg5', 'seg6', 'seg7'],
     'tail': ['tail0', 'tail1', 'tail2', 'tail3', 'tail4', 'tail5', 'tail6', 'tail7', 'tail8', 'tail9'],
     'zodiac': (() => {
         // 动态生成生肖顺序：当年生肖排第一，然后逆序排列
@@ -486,6 +505,7 @@ const categoryNames = {
     'waveCombo': '波色组合',
     'element': '五行',
     'head': '头数',
+    'segment': '七段',
     'tail': '尾数',
     'zodiac': '生肖'
 };
@@ -1320,6 +1340,9 @@ function getDetailedStatistics(numbers) {
     let tailBigCount = 0, tailSmallCount = 0;
     let wildCount = 0, domesticCount = 0;
     const elementStats = { '金': 0, '木': 0, '水': 0, '火': 0, '土': 0 };
+    const headStats = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 };
+    const segmentStats = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 };
+    const tailStats = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0 };
     const zodiacOrder = filterCategories['zodiac'];
     const zodiacStats = {};
 
@@ -1340,20 +1363,37 @@ function getDetailedStatistics(numbers) {
         const element = numberToElement[n];
         if (element) elementStats[element]++;
 
+        // 头数统计：十位数字（1-9号头数为0）
+        const headDigit = Math.floor(n / 10);
+        headStats[headDigit]++;
+
+        // 七段统计：第几段 = Math.ceil(n/7)
+        const seg = Math.ceil(n / 7);
+        if (seg >= 1 && seg <= 7) segmentStats[seg]++;
+
+        // 尾数统计：个位数字
+        const tailDigit = n % 10;
+        tailStats[tailDigit]++;
+
         const zodiac = numberToZodiac[n];
         if (zodiac) zodiacStats[zodiac]++;
     });
 
     let info = '📈 分类统计：\n';
-    info += `  波色: 🔴红${redCount} 🔵蓝${blueCount} 🟢绿${greenCount}\n`;
-    info += `  大小: 大${bigCount} 小${smallCount}\n`;
-    info += `  单双: 单${oddCount} 双${evenCount}\n`;
-    info += `  尾大小: 尾大${tailBigCount} 尾小${tailSmallCount}\n`;
-    info += `  家野: 野肖${wildCount} 家肖${domesticCount}\n`;
-    info += `  五行: 金${elementStats['金']} 木${elementStats['木']} 水${elementStats['水']} 火${elementStats['火']} 土${elementStats['土']}\n`;
+    info += `  波色: 🔴红(${redCount}) 🔵蓝(${blueCount}) 🟢绿(${greenCount})\n`;
+    info += `  大小: 大(${bigCount}) 小(${smallCount})\n`;
+    info += `  单双: 单(${oddCount}) 双(${evenCount})\n`;
+    info += `  尾大小: 尾大(${tailBigCount}) 尾小(${tailSmallCount})\n`;
+    info += `  家野: 野肖(${wildCount}) 家肖(${domesticCount})\n`;
+    info += `  五行: 金(${elementStats['金']}) 木(${elementStats['木']}) 水(${elementStats['水']}) 火(${elementStats['火']}) 土(${elementStats['土']})\n`;
+    info += `  头数: 0头(${headStats[0]}) 1头(${headStats[1]}) 2头(${headStats[2]}) 3头(${headStats[3]}) 4头(${headStats[4]})\n`;
+    info += `  七段: 一(${segmentStats[1]}) 二(${segmentStats[2]}) 三(${segmentStats[3]}) 四(${segmentStats[4]}) 五(${segmentStats[5]}) 六(${segmentStats[6]}) 七(${segmentStats[7]})\n`;
 
-    const zodiacList = zodiacOrder.map(z => `${z}${zodiacStats[z]}`);
+    const zodiacList = zodiacOrder.map(z => `${z}(${zodiacStats[z]})`);
     info += `  生肖: ${zodiacList.join(' ')}\n`;
+
+    const tailList = [0,1,2,3,4,5,6,7,8,9].map(t => `${t}尾(${tailStats[t]})`);
+    info += `  尾数: ${tailList.join(' ')}\n`;
 
     return info;
 }

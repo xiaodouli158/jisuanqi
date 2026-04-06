@@ -404,7 +404,7 @@ body {
 .filter-buttons {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 4px;
     flex: 1;
 }
 
@@ -413,14 +413,14 @@ body {
 }
 
 .filter-btn {
-    padding: 8px 0;
+    padding: 6px 0;
     border: 1px solid #999;
     background: #f5f5f5;
     cursor: pointer;
     font-size: 13px;
     transition: all 0.2s;
     border-radius: 4px;
-    width: 64px;
+    width: 53px;
     text-align: center;
     display: inline-flex;
     align-items: center;
@@ -577,9 +577,9 @@ body {
     }
 
     .filter-btn {
-        width: 56px;
-        padding: 6px 0;
-        font-size: 12px;
+        width: 43px;
+        padding: 4px 0;
+        font-size: 11px;
     }
 
     .number-grid {
